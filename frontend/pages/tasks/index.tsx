@@ -33,6 +33,7 @@ const Tasks = () => {
     createTask();
   }, [createTask]);
 
+  console.log(titleProps, notesProps)
   return (
       <div>
         <h2>タスクの作成</h2>
@@ -43,6 +44,7 @@ const Tasks = () => {
               placeholder="ピーマンを買いに行く"
               type="text"
               required={true}
+              {...titleProps}
             />
           </Form.Field>
           <Form.Field>
@@ -50,6 +52,7 @@ const Tasks = () => {
             <Form.Input
               placeholder="駅前のOKストアがマジで安い"
               type="text"
+              {...notesProps}
             />
           </Form.Field>
         </Form>
