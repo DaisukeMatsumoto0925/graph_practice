@@ -15,7 +15,7 @@ services:
       DB_USER: root
       DB_PASSWORD: password
       DB_NAME: graphql-app-development
-      CORS_ALLOW_ORIGIN: http://localhost:8081
+      CORS_ALLOW_ORIGIN: http://localhost:3100
     ports:
       - 3000:3000
     depends_on:
