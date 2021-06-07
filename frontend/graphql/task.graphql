@@ -1,0 +1,26 @@
+# fragment taskFields on Task {
+#   id
+#   title
+#   note
+#   completed
+#   created_at
+# }
+
+# query fetchTasks() {
+#   tasks() {
+#     ...taskFields
+#   }
+# }
+
+mutation createTask(
+  $title: String!
+  $note: String!
+) {
+  createTask(
+    input: { title: $title, note: $note}
+  ) {
+    id
+    title
+    note
+  }
+}
