@@ -20,7 +20,7 @@ func main() {
 	db, err := config.InitDB()
 	if err != nil {
 		panic(err.Error())
-    }
+	}
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{os.Getenv("CORS_ALLOW_ORIGIN")},
