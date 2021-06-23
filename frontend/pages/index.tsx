@@ -4,10 +4,16 @@ import styles from '../styles/Home.module.css'
 import Link from 'next/link'
 import { useState } from 'react'
 
+const useCount = () => {
+  const [count, setCount] = useState(0)
+  const countUp = () => setCount((c) => c + 1)
+  return [count, countUp] as const
+}
 
 export default function Home() {
   const [count, setCount] = useState(0)
   console.log(count)
+  const [customCount, customCountUp] = useCount()
 
   return (
     <div className={styles.container}>
@@ -18,6 +24,9 @@ export default function Home() {
       </Head>
       <button onClick={()=>setCount(count+1)}>
         {count}
+      </button>
+      <button onClick={customCountUp}>
+        custom{customCount}
       </button>
       <main className={styles.main}>
         <div>
