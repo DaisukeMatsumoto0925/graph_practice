@@ -10,19 +10,35 @@ const useCount = () => {
   return [count, countUp] as const
 }
 
-export default function Home() {
-  const [count, setCount] = useState(0)
-  // console.log(count)
-  const [customCount, customCountUp] = useCount()
+const useCurrentDate = (interval: any) => {
   const [date, setDate] = useState(new Date())
 
   useEffect(()=>{
     const timer = setInterval(()=>{
-      setDate(new Date())
-    }, 1000);
-    
+      setDate(new Date());
+    }, interval)
+
     return () => clearInterval(timer)
   }, [setDate])
+
+  return date
+}
+
+export default function Home() {
+  const [count, setCount] = useState(0)
+  // console.log(count)
+  const [customCount, customCountUp] = useCount()
+  // const [date, setDate] = useState(new Date())
+
+  // useEffect(()=>{
+  //   const timer = setInterval(()=>{
+  //     setDate(new Date())
+  //   }, 1000);
+
+  //   return () => clearInterval(timer)
+  // }, [setDate])
+
+  const date = useCurrentDate(1000)
 
   return (
     <div className={styles.container}>
