@@ -2,7 +2,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const useCount = () => {
   const [count, setCount] = useState(0)
@@ -12,8 +12,17 @@ const useCount = () => {
 
 export default function Home() {
   const [count, setCount] = useState(0)
-  console.log(count)
+  // console.log(count)
   const [customCount, customCountUp] = useCount()
+  const [date, setDate] = useState(new Date())
+
+  useEffect(()=>{
+    const timer = setInterval(()=>{
+      setDate(new Date())
+    }, 1000);
+    
+    return () => clearInterval(timer)
+  }, [setDate])
 
   return (
     <div className={styles.container}>
@@ -28,6 +37,7 @@ export default function Home() {
       <button onClick={customCountUp}>
         custom{customCount}
       </button>
+      <div>{date.toLocaleTimeString()}</div>
       <main className={styles.main}>
         <div>
           <Link href={`/tasks`}>
