@@ -1,3 +1,4 @@
+import { useQuery } from "@apollo/client";
 import React, { useCallback, useState, useEffect, useMemo } from "react";
 import {
   Dimmer,
@@ -13,7 +14,8 @@ import { useTaskFields } from "../../hooks/formHooks";
 
 import {
   useCreateTaskMutation,
-  Task
+  Task,
+  useTasksQuery,
 } from "../../src/generated/graphql";
 
 const Tasks = () => {
@@ -27,6 +29,7 @@ const Tasks = () => {
       title: titleProps.value,
       note: notesProps.value,
     },
+    onCompleted: () => {refetch()}
   });
 
   const handleButtonClick = useCallback(() => {
@@ -34,8 +37,15 @@ const Tasks = () => {
   }, [createTask]);
 
   console.log(titleProps, notesProps)
+
+  const {data, refetch} = useTasksQuery({
+    onError: (e) => {console.log(e)}
+  })
+
+  console.log(data)
+
   return (
-      <div>
+      <>
         <h2>タスクの作成</h2>
         <Form>
           <Form.Field required={true}>
@@ -63,7 +73,20 @@ const Tasks = () => {
           >
             <Icon name="plus" /> 追加する
         </Button>
-      </div>
+        <div>
+          {data?.tasks.map((task, i) => {
+            return(
+              <div key={i}>
+                {task?.title}
+                {" "}
+                {task?.note}
+                {" "}
+                {task?.created_at}
+              </div>
+            )
+          })}
+        </div>
+      </>
   );
 };
 export default Tasks;
