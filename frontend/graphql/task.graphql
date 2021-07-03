@@ -1,26 +1,50 @@
-# fragment taskFields on Task {
-#   id
-#   title
-#   note
-#   completed
-#   created_at
-# }
+fragment taskFields on Task {
+  id
+  title
+  note
+  completed
+  created_at
+}
 
-# query fetchTasks() {
-#   tasks() {
-#     ...taskFields
-#   }
-# }
+query Tasks  {
+  tasks  {
+    ...taskFields
+  }
+}
 
-mutation createTask(
-  $title: String!
-  $note: String!
-) {
-  createTask(
-    input: { title: $title, note: $note}
-  ) {
+mutation createTask($title: String!, $note: String!) {
+  createTask(input: { title: $title, note: $note }) {
     id
     title
     note
   }
 }
+
+# query tasks(
+#   $completed: Boolean,
+#   $orderBy: TaskOrderFields!,
+#   $first: Int,
+#   $after: String
+# ){
+#   tasks(
+#     input: {completed: $completed},
+#     orderBy: $orderBy,
+#     page: { first: $first, after: $after }
+#     ){
+#     pageInfo {
+#       endCursor
+#       hasNextPage
+#     }
+#     edges {
+#       cursor
+#       node {
+#         id
+#         title
+#         note
+#         completed
+#         created_at
+#         updated_at
+#       }
+#     }
+#   }
+# }
