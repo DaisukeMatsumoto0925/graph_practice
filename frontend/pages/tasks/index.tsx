@@ -1,3 +1,4 @@
+import { NetworkStatus } from '@apollo/client';
 import { useQuery } from "@apollo/client";
 import React, { useCallback, useState, useEffect, useMemo } from "react";
 import {
@@ -36,13 +37,9 @@ const Tasks = () => {
     createTask();
   }, [createTask]);
 
-  console.log(titleProps, notesProps)
+  // console.log(titleProps, notesProps)
 
-  const {data, refetch} = useTasksQuery({
-    onError: (e) => {console.log(e)}
-  })
-
-  console.log(data)
+  const {data, refetch, networkStatus, loading, error} = useTasksQuery()
 
   return (
       <>
@@ -74,6 +71,7 @@ const Tasks = () => {
             <Icon name="plus" /> 追加する
         </Button>
         <div>
+        <button onClick={() => refetch()}>Refetch!</button>
           {data?.tasks.map((task, i) => {
             return(
               <div key={i}>
