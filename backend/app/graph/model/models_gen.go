@@ -3,37 +3,12 @@
 package model
 
 import (
-	"fmt"
-	"io"
-	"strconv"
 	"time"
 )
-
-type Connection interface {
-	IsConnection()
-}
-
-type Edge interface {
-	IsEdge()
-}
-
-type Node interface {
-	IsNode()
-}
 
 type NewTask struct {
 	Title string `json:"title"`
 	Note  string `json:"note"`
-}
-
-type PageInfo struct {
-	EndCursor   string `json:"endCursor"`
-	HasNextPage bool   `json:"hasNextPage"`
-}
-
-type PaginationInput struct {
-	First *int    `json:"first"`
-	After *string `json:"after"`
 }
 
 type Task struct {
@@ -43,65 +18,4 @@ type Task struct {
 	Completed int       `json:"completed"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func (Task) IsNode() {}
-
-type TaskConnection struct {
-	PageInfo *PageInfo   `json:"pageInfo"`
-	Edges    []*TaskEdge `json:"edges"`
-}
-
-func (TaskConnection) IsConnection() {}
-
-type TaskEdge struct {
-	Cursor string `json:"cursor"`
-	Node   *Task  `json:"node"`
-}
-
-func (TaskEdge) IsEdge() {}
-
-type TasksInput struct {
-	Completed *bool `json:"completed"`
-}
-
-type TaskOrderFields string
-
-const (
-	TaskOrderFieldsLatest TaskOrderFields = "LATEST"
-	TaskOrderFieldsTitle  TaskOrderFields = "TITLE"
-)
-
-var AllTaskOrderFields = []TaskOrderFields{
-	TaskOrderFieldsLatest,
-	TaskOrderFieldsTitle,
-}
-
-func (e TaskOrderFields) IsValid() bool {
-	switch e {
-	case TaskOrderFieldsLatest, TaskOrderFieldsTitle:
-		return true
-	}
-	return false
-}
-
-func (e TaskOrderFields) String() string {
-	return string(e)
-}
-
-func (e *TaskOrderFields) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TaskOrderFields(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TaskOrderFields", str)
-	}
-	return nil
-}
-
-func (e TaskOrderFields) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }

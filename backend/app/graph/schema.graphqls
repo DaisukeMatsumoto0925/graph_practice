@@ -1,4 +1,13 @@
-type Task implements Node {
+# type Task implements Node {
+#   id: ID!
+#   title: String!
+#   note: String!
+#   completed: Int! # 0 or 1
+#   created_at: Time!
+#   updated_at: Time!
+# }
+
+type Task {
   id: ID!
   title: String!
   note: String!
@@ -17,30 +26,31 @@ type Mutation {
 }
 
 type Query {
-  tasks(
-    input: TasksInput!
-    orderBy: TaskOrderFields!
-    page: PaginationInput!
-  ): TaskConnection!
+  # tasks(
+  #   input: TasksInput!
+  #   orderBy: TaskOrderFields!
+  #   page: PaginationInput!
+  # ): TaskConnection!
+  tasks: [Task]!
 }
 
-input TasksInput {
-  completed: Boolean
-}
+# input TasksInput {
+#   completed: Boolean
+# }
 
-enum TaskOrderFields {
-  LATEST
-  TITLE
-}
+# enum TaskOrderFields {
+#   LATEST
+#   TITLE
+# }
 
-type TaskEdge implements Edge {
-  cursor: String!
-  node: Task!
-}
+# type TaskEdge implements Edge {
+#   cursor: String!
+#   node: Task!
+# }
 
-type TaskConnection implements Connection {
-  pageInfo: PageInfo!
-  edges: [TaskEdge]!
-}
+# type TaskConnection implements Connection {
+#   pageInfo: PageInfo!
+#   edges: [TaskEdge]!
+# }
 
 scalar Time
