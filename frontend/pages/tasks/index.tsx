@@ -1,4 +1,4 @@
-import { NetworkStatus } from '@apollo/client';
+import { NetworkStatus, useApolloClient } from '@apollo/client';
 import { useQuery } from "@apollo/client";
 import React, { useCallback, useState, useEffect, useMemo } from "react";
 import {
@@ -53,6 +53,16 @@ const Tasks = () => {
     }
   })
 
+  const client = useApolloClient();
+
+  const task = client.readQuery({
+    query: FindTaskDocument,
+    variables: {
+      id: "16",
+    },
+  })
+
+console.log("task", task)
 
   return (
       <>
