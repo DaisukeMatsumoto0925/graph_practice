@@ -1,4 +1,4 @@
-import { NetworkStatus, useApolloClient } from '@apollo/client';
+import { gql, NetworkStatus, useApolloClient } from '@apollo/client';
 import { useQuery } from "@apollo/client";
 import React, { useCallback, useState, useEffect, useMemo } from "react";
 import {
@@ -20,6 +20,8 @@ import {
   useUpdateTaskMutation,
   useFindTaskQuery,
   FindTaskDocument,
+  UpdateTaskDocument,
+  CreateTaskDocument,
 } from "../../src/generated/graphql";
 import { createApolloClient } from '../_app';
 
@@ -61,6 +63,21 @@ const Tasks = () => {
       id: "16",
     },
   })
+
+  // const writeCacheTask = (id: string) => {
+  //   console.log("update cache")
+  //   client.writeQuery({
+  //     query: UpdateTaskDocument,
+  //     data: { // Contains the data to write
+  //       task: {
+  //         __typename: 'Task',
+  //         id: id,
+  //         text: 'Buy grapes 🍇',
+  //         completed: false
+  //       },
+  //     },
+  //   });
+  // }
 
 console.log("task", task)
 
@@ -112,6 +129,7 @@ console.log("task", task)
                 })}>
                   ✔︎
                 </button>
+                {/* <button onClick={()=>writeCacheTask(task?.id as string)}>キャッシュ更新</button> */}
               </div>
             )
           })}
