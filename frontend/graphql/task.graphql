@@ -20,6 +20,16 @@ mutation createTask($title: String!, $note: String!) {
   }
 }
 
+mutation updateTask($id: ID!, $title: String, $note: String, $completed: Int) {
+  updateTask(
+    input: { id: $id, title: $title, note: $note, completed: $completed }
+  ) {
+    id
+    title
+    note
+    completed
+  }
+}
 # query tasks(
 #   $completed: Boolean,
 #   $orderBy: TaskOrderFields!,

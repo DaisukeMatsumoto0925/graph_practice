@@ -25,13 +25,15 @@ const Tasks = () => {
     notesProps
   } = useTaskFields();
 
-  const [createTask] = useCreateTaskMutation({
+  const [createTask,{ data: createdData,loading: mutateLoading,called },] = useCreateTaskMutation({
     variables: {
       title: titleProps.value,
       note: notesProps.value,
     },
     onCompleted: () => {refetch()}
   });
+
+  console.log(createdData)
 
   const handleButtonClick = useCallback(() => {
     createTask();
