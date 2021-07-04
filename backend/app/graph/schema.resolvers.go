@@ -8,7 +8,6 @@ import (
 	"app/graph/model"
 	"context"
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -27,12 +26,10 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) 
 }
 
 func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
-	var task *model.Task
-	foundTask := r.DB.First(&task, input.ID)
+	var task model.Task
+	r.DB.First(&task, input.ID)
 
-	fmt.Printf("\n\n\nfound:   %v\n\n\n", foundTask)
-
-	if *input.Title == "" && *input.Note == "" && *input.Completed >= 2 {
+	if input.Title == nil && input.Note == nil && input.Completed == nil {
 		return nil, errors.New("could not update a task: params error")
 	}
 
@@ -42,13 +39,15 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 	if input.Note != nil {
 		task.Note = *input.Note
 	}
-	if input.Title != nil {
+	if input.Completed != nil {
 		task.Completed = *input.Completed
 	}
 
-	r.DB.Save(&task)
+	if err := r.DB.Save(task).Error; err != nil {
+		return nil, err
+	}
 
-	return task, nil
+	return &task, nil
 }
 
 func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {

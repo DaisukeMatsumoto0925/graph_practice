@@ -10,13 +10,12 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
-var db *gorm.DB
-
 func InitDB() (*gorm.DB, error) {
 	conn, err := gorm.Open("mysql", dbsn())
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("connected %v", dbsn())
 	return conn, err
 }
 
@@ -29,8 +28,4 @@ func dbsn() string {
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_NAME"),
 	)
-}
-
-func DB() *gorm.DB {
-	return db
 }
