@@ -36,7 +36,7 @@ const Tasks = () => {
     onCompleted: () => {refetch()}
   });
 
-  const [updateTask] = useUpdateTaskMutation({})
+  const [updateTask] = useUpdateTaskMutation()
 
   const handleButtonClick = useCallback(() => {
     createTask();
