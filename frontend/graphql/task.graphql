@@ -30,6 +30,15 @@ mutation updateTask($id: ID!, $title: String, $note: String, $completed: Int) {
     completed
   }
 }
+
+query FindTask($id: ID!) {
+  task(id: $id) {
+    id
+    title
+    note
+  }
+}
+
 # query tasks(
 #   $completed: Boolean,
 #   $orderBy: TaskOrderFields!,

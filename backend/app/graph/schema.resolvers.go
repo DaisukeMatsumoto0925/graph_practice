@@ -93,6 +93,15 @@ func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
 	// }
 }
 
+func (r *queryResolver) Task(ctx context.Context, id int) (*model.Task, error) {
+	task := &model.Task{}
+	if err := r.DB.First(task, id).Error; err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

@@ -1,8 +1,9 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from "@apollo/client";
+import { FindTaskDocument, TasksDocument, useFindTaskQuery } from '../src/generated/graphql';
 
-const createApolloClient = () => {
+export const createApolloClient = () => {
   return new ApolloClient({
     link: new HttpLink({
       uri: 'http://localhost:3000/query',
@@ -10,8 +11,8 @@ const createApolloClient = () => {
     cache: new InMemoryCache(),
   });
  };
-
 const client = createApolloClient()
+
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ApolloProvider client={client}>

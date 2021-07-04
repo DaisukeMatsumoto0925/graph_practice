@@ -15,23 +15,6 @@ export type Scalars = {
   Time: string;
 };
 
-export type Query = {
-  __typename?: 'Query';
-  tasks: Array<Maybe<Task>>;
-};
-
-
-export type UpdateTask = {
-  id: Scalars['ID'];
-  title?: Maybe<Scalars['String']>;
-  note?: Maybe<Scalars['String']>;
-  completed?: Maybe<Scalars['Int']>;
-};
-
-export type NewTask = {
-  title: Scalars['String'];
-  note: Scalars['String'];
-};
 
 export type Task = {
   __typename?: 'Task';
@@ -41,6 +24,29 @@ export type Task = {
   completed: Scalars['Int'];
   created_at: Scalars['Time'];
   updated_at: Scalars['Time'];
+};
+
+export type Query = {
+  __typename?: 'Query';
+  tasks: Array<Maybe<Task>>;
+  task: Task;
+};
+
+
+export type QueryTaskArgs = {
+  id: Scalars['ID'];
+};
+
+export type NewTask = {
+  title: Scalars['String'];
+  note: Scalars['String'];
+};
+
+export type UpdateTask = {
+  id: Scalars['ID'];
+  title?: Maybe<Scalars['String']>;
+  note?: Maybe<Scalars['String']>;
+  completed?: Maybe<Scalars['Int']>;
 };
 
 export type Mutation = {
@@ -102,6 +108,19 @@ export type UpdateTaskMutation = (
   & { updateTask: (
     { __typename?: 'Task' }
     & Pick<Task, 'id' | 'title' | 'note' | 'completed'>
+  ) }
+);
+
+export type FindTaskQueryVariables = {
+  id: Scalars['ID'];
+};
+
+
+export type FindTaskQuery = (
+  { __typename?: 'Query' }
+  & { task: (
+    { __typename?: 'Task' }
+    & Pick<Task, 'id' | 'title' | 'note'>
   ) }
 );
 
@@ -223,3 +242,40 @@ export function useUpdateTaskMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UpdateTaskMutationHookResult = ReturnType<typeof useUpdateTaskMutation>;
 export type UpdateTaskMutationResult = Apollo.MutationResult<UpdateTaskMutation>;
 export type UpdateTaskMutationOptions = Apollo.BaseMutationOptions<UpdateTaskMutation, UpdateTaskMutationVariables>;
+export const FindTaskDocument = gql`
+    query FindTask($id: ID!) {
+  task(id: $id) {
+    id
+    title
+    note
+  }
+}
+    `;
+
+/**
+ * __useFindTaskQuery__
+ *
+ * To run a query within a React component, call `useFindTaskQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindTaskQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindTaskQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFindTaskQuery(baseOptions: Apollo.QueryHookOptions<FindTaskQuery, FindTaskQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindTaskQuery, FindTaskQueryVariables>(FindTaskDocument, options);
+      }
+export function useFindTaskLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindTaskQuery, FindTaskQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindTaskQuery, FindTaskQueryVariables>(FindTaskDocument, options);
+        }
+export type FindTaskQueryHookResult = ReturnType<typeof useFindTaskQuery>;
+export type FindTaskLazyQueryHookResult = ReturnType<typeof useFindTaskLazyQuery>;
+export type FindTaskQueryResult = Apollo.QueryResult<FindTaskQuery, FindTaskQueryVariables>;

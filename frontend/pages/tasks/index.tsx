@@ -18,7 +18,10 @@ import {
   Task,
   useTasksQuery,
   useUpdateTaskMutation,
+  useFindTaskQuery,
+  FindTaskDocument,
 } from "../../src/generated/graphql";
+import { createApolloClient } from '../_app';
 
 const Tasks = () => {
   const {
@@ -43,6 +46,12 @@ const Tasks = () => {
   }, [createTask]);
 
   // console.log(titleProps, notesProps)
+
+  const {data: foundTask} = useFindTaskQuery({
+    variables: {
+      id: "16",
+    }
+  })
 
 
   return (

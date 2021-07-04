@@ -40,6 +40,7 @@ type Query {
   #   page: PaginationInput!
   # ): TaskConnection!
   tasks: [Task]!
+  task(id: ID!): Task!
 }
 
 # input TasksInput {
