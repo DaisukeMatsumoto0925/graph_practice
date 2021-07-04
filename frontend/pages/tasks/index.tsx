@@ -17,6 +17,7 @@ import {
   useCreateTaskMutation,
   Task,
   useTasksQuery,
+  useUpdateTaskMutation,
 } from "../../src/generated/graphql";
 
 const Tasks = () => {
@@ -24,6 +25,8 @@ const Tasks = () => {
     titleProps,
     notesProps
   } = useTaskFields();
+
+  const {data, refetch, networkStatus, loading, error} = useTasksQuery()
 
   const [createTask,{ data: createdData,loading: mutateLoading,called },] = useCreateTaskMutation({
     variables: {
@@ -33,7 +36,7 @@ const Tasks = () => {
     onCompleted: () => {refetch()}
   });
 
-  console.log(createdData)
+  const [updateTask] = useUpdateTaskMutation({})
 
   const handleButtonClick = useCallback(() => {
     createTask();
@@ -41,7 +44,6 @@ const Tasks = () => {
 
   // console.log(titleProps, notesProps)
 
-  const {data, refetch, networkStatus, loading, error} = useTasksQuery()
 
   return (
       <>
@@ -77,11 +79,20 @@ const Tasks = () => {
           {data?.tasks.map((task, i) => {
             return(
               <div key={i}>
+                {task?.completed == 0 ? "[ ]" : "[x]"}
                 {task?.title}
                 {" "}
                 {task?.note}
                 {" "}
                 {task?.created_at}
+                <button onClick={()=>updateTask({
+                  variables: {
+                    id: task?.id as string,
+                    completed: task?.completed === 1 ? 0 : 1
+                  }
+                })}>
+                  ✔︎
+                </button>
               </div>
             )
           })}
