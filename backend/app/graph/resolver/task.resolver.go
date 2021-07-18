@@ -52,5 +52,10 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 }
 
 func (r *queryResolver) Task(ctx context.Context, id int) (*model.Task, error) {
-	panic(fmt.Errorf("not implemented"))
+	var task model.Task
+	if err := r.DB.First(&task, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &task, nil
 }
