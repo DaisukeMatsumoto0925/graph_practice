@@ -1,0 +1,21 @@
+
+type Task implements Node {
+  id: ID!
+  title: String!
+  note: String!
+  completed: Int! # 0 or 1
+  created_at: Time!
+  updated_at: Time!
+}
+
+input NewTask {
+  title: String!
+  note: String!
+}
+
+input UpdateTask {
+  id: ID!
+  title: String
+  note: String
+  completed: Int
+}

@@ -51,50 +51,14 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 }
 
 func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
-	// if input.Completed != nil {
-	// 	r.DB = r.DB.Where("completed = 1", *input.Completed)
-	// }
-
-	// var err error
 	var tasks []*model.Task
 	r.DB.Find(&tasks)
 
 	return tasks, nil
-
-	// switch orderBy {
-	// case model.TaskOrderFieldsLatest:
-	// 	r.DB.Where("id >= ?", *page.First).Limit(*page.After).Find(&tasks)
-	// 	// db, err = pageDB(db, "created_at", "desc", page)
-	// 	// if err != nil {
-	// 	// 	return &model.TaskConnection{PageInfo: &model.PageInfo{}}, err
-	// 	// }
-
-	// 	// var tasks []*model.Task
-	// 	// if err := db.Find(&tasks).Error; err != nil {
-	// 	// 	return &model.TaskConnection{PageInfo: &model.PageInfo{}}, err
-	// 	// }
-
-	// 	fmt.Printf("%v", *page.After)
-
-	// 	return convertToConnection(tasks, orderBy, page), nil
-	// // case model.TaskOrderFieldsTitle:
-	// // 	db, err = pageDB(db, "title", "asc", page)
-	// // 	if err != nil {
-	// // 		return &model.TaskConnection{PageInfo: &model.PageInfo{}}, err
-	// // 	}
-
-	// // 	if err := db.Find(&tasks).Error; err != nil {
-	// // 		return &model.TaskConnection{PageInfo: &model.PageInfo{}}, err
-	// // 	}
-
-	// // 	return convertToConnection(tasks, orderBy, page), nil
-	// default:
-	// 	return &model.TaskConnection{PageInfo: &model.PageInfo{}}, errors.New("invalid order by")
-	// }
 }
 
 func (r *queryResolver) Task(ctx context.Context, id int) (*model.Task, error) {
-	task := &model.Task{}
+	var task *model.Task
 	if err := r.DB.First(task, id).Error; err != nil {
 		return nil, err
 	}

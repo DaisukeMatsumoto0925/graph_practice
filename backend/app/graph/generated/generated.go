@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -47,6 +48,13 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateTask func(childComplexity int, input model.NewTask) int
 		UpdateTask func(childComplexity int, input model.UpdateTask) int
+	}
+
+	PageInfo struct {
+		EndCursor       func(childComplexity int) int
+		HasNextPage     func(childComplexity int) int
+		HasPreviousPage func(childComplexity int) int
+		StartCursor     func(childComplexity int) int
 	}
 
 	Query struct {
@@ -111,6 +119,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateTask(childComplexity, args["input"].(model.UpdateTask)), true
+
+	case "PageInfo.endCursor":
+		if e.complexity.PageInfo.EndCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.EndCursor(childComplexity), true
+
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+
+	case "PageInfo.hasPreviousPage":
+		if e.complexity.PageInfo.HasPreviousPage == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
+
+	case "PageInfo.startCursor":
+		if e.complexity.PageInfo.StartCursor == nil {
+			break
+		}
+
+		return e.complexity.PageInfo.StartCursor(childComplexity), true
 
 	case "Query.task":
 		if e.complexity.Query.Task == nil {
@@ -237,40 +273,59 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/page.graphqls", Input: `# type PageInfo {
-#   endCursor: String!
-#   hasNextPage: Boolean!
-# }
+	{Name: "graph/page.graphql", Input: `type PageInfo {
+  startCursor: String
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
 
-# interface Connection {
-#   pageInfo: PageInfo!
-#   edges: [Edge]!
-# }
+interface Connection {
+  pageInfo: PageInfo!
+  edges: [Edge!]!
+  nodes: [Node!]!
+}
 
-# interface Edge {
-#   cursor: String!
-#   node: Node!
-# }
+interface Edge {
+  cursor: String!
+  node: Node!
+}
 
-# interface Node {
-#   id: ID!
-# }
+input PaginationInput {
+  # 次方向ページングの時に使う
+  first: Int # 順方向に何件か
+  after: String # afterで指定したcursorより後のedgeを取得
 
-# input PaginationInput {
-#   first: Int
-#   after: String
-# }
+  # 前方向ページングの時に使う
+  last: Int # 逆方向に何件か
+  before: String # beforeで指定したcursorより前のedgeを取得
+}
 `, BuiltIn: false},
-	{Name: "graph/schema.graphqls", Input: `# type Task implements Node {
-#   id: ID!
-#   title: String!
-#   note: String!
-#   completed: Int! # 0 or 1
-#   created_at: Time!
-#   updated_at: Time!
-# }
+	{Name: "graph/schema.graphql", Input: `schema {
+  query: Query
+  mutation: Mutation
+  # subscription: Subscription
+}
 
-type Task {
+type Mutation {
+  createTask(input: NewTask!): Task!
+  updateTask(input: UpdateTask!): Task!
+}
+
+type Query {
+  tasks: [Task]!
+  task(id: ID!): Task!
+}
+
+
+interface Node {
+  id: ID!
+}
+
+scalar Time
+`, BuiltIn: false},
+	{Name: "graph/task.graphql", Input: `
+type Task implements Node {
   id: ID!
   title: String!
   note: String!
@@ -290,42 +345,6 @@ input UpdateTask {
   note: String
   completed: Int
 }
-
-type Mutation {
-  createTask(input: NewTask!): Task!
-  updateTask(input: UpdateTask!): Task!
-}
-
-type Query {
-  # tasks(
-  #   input: TasksInput!
-  #   orderBy: TaskOrderFields!
-  #   page: PaginationInput!
-  # ): TaskConnection!
-  tasks: [Task]!
-  task(id: ID!): Task!
-}
-
-# input TasksInput {
-#   completed: Boolean
-# }
-
-# enum TaskOrderFields {
-#   LATEST
-#   TITLE
-# }
-
-# type TaskEdge implements Edge {
-#   cursor: String!
-#   node: Task!
-# }
-
-# type TaskConnection implements Connection {
-#   pageInfo: PageInfo!
-#   edges: [TaskEdge]!
-# }
-
-scalar Time
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -514,6 +533,140 @@ func (ec *executionContext) _Mutation_updateTask(ctx context.Context, field grap
 	res := resTmp.(*model.Task)
 	fc.Result = res
 	return ec.marshalNTask2ᚖappᚋgraphᚋmodelᚐTask(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartCursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndCursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNextPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PageInfo_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PageInfo",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasPreviousPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1989,6 +2142,50 @@ func (ec *executionContext) unmarshalInputNewTask(ctx context.Context, obj inter
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputPaginationInput(ctx context.Context, obj interface{}) (model.PaginationInput, error) {
+	var it model.PaginationInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "first":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+			it.First, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "after":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+			it.After, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "last":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+			it.Last, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "before":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+			it.Before, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateTask(ctx context.Context, obj interface{}) (model.UpdateTask, error) {
 	var it model.UpdateTask
 	var asMap = obj.(map[string]interface{})
@@ -2037,6 +2234,40 @@ func (ec *executionContext) unmarshalInputUpdateTask(ctx context.Context, obj in
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Connection(ctx context.Context, sel ast.SelectionSet, obj model.Connection) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _Edge(ctx context.Context, sel ast.SelectionSet, obj model.Edge) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj model.Node) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Task:
+		return ec._Task(ctx, sel, &obj)
+	case *model.Task:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Task(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -2063,6 +2294,42 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "updateTask":
 			out.Values[i] = ec._Mutation_updateTask(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var pageInfoImplementors = []string{"PageInfo"}
+
+func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pageInfoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PageInfo")
+		case "startCursor":
+			out.Values[i] = ec._PageInfo_startCursor(ctx, field, obj)
+		case "endCursor":
+			out.Values[i] = ec._PageInfo_endCursor(ctx, field, obj)
+		case "hasNextPage":
+			out.Values[i] = ec._PageInfo_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hasPreviousPage":
+			out.Values[i] = ec._PageInfo_hasPreviousPage(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2135,7 +2402,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var taskImplementors = []string{"Task"}
+var taskImplementors = []string{"Task", "Node"}
 
 func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj *model.Task) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, taskImplementors)
