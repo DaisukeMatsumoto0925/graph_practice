@@ -48,6 +48,21 @@ type Task struct {
 
 func (Task) IsNode() {}
 
+type TaskConnection struct {
+	PageInfo *PageInfo   `json:"pageInfo"`
+	Edges    []*TaskEdge `json:"edges"`
+	Nodes    []*Task     `json:"nodes"`
+}
+
+func (TaskConnection) IsConnection() {}
+
+type TaskEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Task  `json:"node"`
+}
+
+func (TaskEdge) IsEdge() {}
+
 type UpdateTask struct {
 	ID        int     `json:"id"`
 	Title     *string `json:"title"`

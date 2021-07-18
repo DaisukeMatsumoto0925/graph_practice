@@ -10,7 +10,7 @@ type Mutation {
 }
 
 type Query {
-  tasks: [Task]!
+  tasks(input: PaginationInput!): TaskConnection!
   task(id: ID!): Task!
 }
 

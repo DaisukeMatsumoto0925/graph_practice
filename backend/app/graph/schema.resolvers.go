@@ -8,6 +8,7 @@ import (
 	"app/graph/model"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -50,20 +51,12 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 	return &task, nil
 }
 
-func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
-	var tasks []*model.Task
-	r.DB.Find(&tasks)
-
-	return tasks, nil
+func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) (*model.TaskConnection, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Task(ctx context.Context, id int) (*model.Task, error) {
-	var task *model.Task
-	if err := r.DB.First(task, id).Error; err != nil {
-		return nil, err
-	}
-
-	return task, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

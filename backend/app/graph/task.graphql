@@ -19,3 +19,14 @@ input UpdateTask {
   note: String
   completed: Int
 }
+
+type TaskConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [TaskEdge!]!
+  nodes: [Task!]!
+}
+
+type TaskEdge implements Edge {
+  cursor: String!
+  node: Task!
+}
