@@ -375,8 +375,7 @@ interface Node {
 
 scalar Time
 `, BuiltIn: false},
-	{Name: "graph/task.graphql", Input: `
-type Task implements Node {
+	{Name: "graph/task.graphql", Input: `type Task implements Node {
   id: ID!
   title: String!
   note: String!

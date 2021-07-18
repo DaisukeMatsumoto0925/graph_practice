@@ -1,10 +1,6 @@
-//go:generate go run github.com/99designs/gqlgen
+package resolver
 
-package graph
-
-import (
-	"github.com/jinzhu/gorm"
-)
+import "github.com/jinzhu/gorm"
 
 // This file will not be regenerated automatically.
 //
