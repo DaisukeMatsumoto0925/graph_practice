@@ -46,7 +46,7 @@ func main() {
 		return nil
 	})
 
-	e.GET("/playground", func(c echo.Context) error {
+	e.GET("/", func(c echo.Context) error {
 		playgroundHandler.ServeHTTP(c.Response(), c.Request())
 		return nil
 	})
