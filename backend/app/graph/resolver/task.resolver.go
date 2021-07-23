@@ -117,8 +117,8 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 		edges[i] = newEdge
 	}
 
-	startCursor := strconv.Itoa(tasks[0].ID)
-	endCursor := strconv.Itoa(tasks[len(tasks)-1].ID)
+	startCursor := edges[0].Cursor
+	endCursor := edges[len(edges)-2].Cursor
 
 	// limitより件数が多いのでHasNextPageがtrueになる
 	if len(tasks) > limit {
