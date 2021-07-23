@@ -53,15 +53,18 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 		return nil, errors.New("input.First or input.Last is required: input error")
 	}
 	if input.First != nil && input.Last != nil {
-		return nil, errors.New("input.First or input.Last is required: input error")
+		return nil, errors.New("passing input.First and input.Last is not supported: input error")
 	}
+	if input.Before != nil && input.After != nil {
+		return nil, errors.New("passing input.Before and input.After is not supported: input error")
+	}
+
 	var limit int
 	if input.First != nil {
 		limit = *input.First
 	} else {
 		limit = *input.Last
 	}
-
 	var tasksSizeLimit = 30
 	if input.First != nil && *input.First > tasksSizeLimit {
 		return nil, errors.New("input.First exceeds tasksSizeLimit: input error ")
@@ -70,33 +73,64 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 		return nil, errors.New("input.Last exceeds tasksSizeLimit: input error ")
 	}
 
-	// DB処理
-	var tasks []*model.Task
-	// var task *model.Task
-
+	// connection情報作成
 	var cursorID int
+
 	db := r.DB
 	if input.After != nil {
-		cursorID = *input.First
-		db.Where("id >= ?", cursorID)
-	} else {
-		cursorID = *input.Last
-		db.Where("id <= ?", cursorID).Order("id desc")
+		cursorID, _ = strconv.Atoi(*input.After)
+		db = db.Where("id > ?", cursorID)
 	}
 
+	if input.Before != nil {
+		cursorID, _ = strconv.Atoi(*input.Before)
+		db = db.Where("id < ?", cursorID).Order("id desc")
+	}
+
+	// SELECT
+	var tasks []*model.Task
 	if err := db.Limit(limit + 1).Find(&tasks).Error; err != nil {
-		return nil, errors.New("error")
+		return nil, errors.New("could not find tasks: data base error ")
+	}
+
+	if len(tasks) == 0 {
+		return &model.TaskConnection{
+			PageInfo: &model.PageInfo{
+				StartCursor:     nil,
+				EndCursor:       nil,
+				HasNextPage:     false,
+				HasPreviousPage: false,
+			},
+			Edges: []*model.TaskEdge{},
+			Nodes: []*model.Task{},
+		}, nil
+	}
+
+	// TODO: hasPreviousPageの判定
+	edges := make([]*model.TaskEdge, len(tasks))
+
+	for i, task := range tasks {
+		newEdge := &model.TaskEdge{
+			Cursor: strconv.Itoa(task.ID),
+			Node:   task,
+		}
+		edges[i] = newEdge
 	}
 
 	startCursor := strconv.Itoa(tasks[0].ID)
 	endCursor := strconv.Itoa(tasks[len(tasks)-1].ID)
 
+	// limitより件数が多いのでHasNextPageがtrueになる
 	if len(tasks) > limit {
-		endCursor := strconv.Itoa(tasks[limit-1].ID)
 		return &model.TaskConnection{
-			PageInfo: &model.PageInfo{StartCursor: &startCursor, EndCursor: &endCursor, HasNextPage: true, HasPreviousPage: true},
-			Edges:    []*model.TaskEdge{},
-			Nodes:    tasks,
+			PageInfo: &model.PageInfo{
+				StartCursor:     &startCursor,
+				EndCursor:       &endCursor,
+				HasNextPage:     true,
+				HasPreviousPage: false,
+			},
+			Edges: edges[:len(edges)-1],
+			Nodes: tasks[:len(tasks)-1],
 		}, nil
 	}
 
@@ -104,10 +138,10 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 		PageInfo: &model.PageInfo{
 			StartCursor:     &startCursor,
 			EndCursor:       &endCursor,
-			HasNextPage:     len(tasks) <= limit,
+			HasNextPage:     false,
 			HasPreviousPage: false,
 		},
-		Edges: []*model.TaskEdge{},
+		Edges: edges,
 		Nodes: tasks,
 	}, nil
 }
