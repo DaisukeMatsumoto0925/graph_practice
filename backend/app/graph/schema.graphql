@@ -1,0 +1,22 @@
+schema {
+  query: Query
+  mutation: Mutation
+  # subscription: Subscription
+}
+
+type Mutation {
+  createTask(input: NewTask!): Task!
+  updateTask(input: UpdateTask!): Task!
+}
+
+type Query {
+  tasks(input: PaginationInput!): TaskConnection!
+  task(id: ID!): Task!
+}
+
+
+interface Node {
+  id: ID!
+}
+
+scalar Time

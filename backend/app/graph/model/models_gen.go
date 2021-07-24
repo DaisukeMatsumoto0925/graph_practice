@@ -6,9 +6,35 @@ import (
 	"time"
 )
 
+type Connection interface {
+	IsConnection()
+}
+
+type Edge interface {
+	IsEdge()
+}
+
+type Node interface {
+	IsNode()
+}
+
 type NewTask struct {
 	Title string `json:"title"`
 	Note  string `json:"note"`
+}
+
+type PageInfo struct {
+	StartCursor     *string `json:"startCursor"`
+	EndCursor       *string `json:"endCursor"`
+	HasNextPage     bool    `json:"hasNextPage"`
+	HasPreviousPage bool    `json:"hasPreviousPage"`
+}
+
+type PaginationInput struct {
+	First  *int    `json:"first"`
+	After  *string `json:"after"`
+	Last   *int    `json:"last"`
+	Before *string `json:"before"`
 }
 
 type Task struct {
@@ -19,6 +45,23 @@ type Task struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+func (Task) IsNode() {}
+
+type TaskConnection struct {
+	PageInfo *PageInfo   `json:"pageInfo"`
+	Edges    []*TaskEdge `json:"edges"`
+	Nodes    []*Task     `json:"nodes"`
+}
+
+func (TaskConnection) IsConnection() {}
+
+type TaskEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Task  `json:"node"`
+}
+
+func (TaskEdge) IsEdge() {}
 
 type UpdateTask struct {
 	ID        int     `json:"id"`

@@ -2,8 +2,8 @@ package main
 
 import (
 	"app/config"
-	"app/graph"
 	"app/graph/generated"
+	"app/graph/resolver"
 	"net/http"
 	"os"
 
@@ -36,7 +36,7 @@ func main() {
 
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
-			generated.Config{Resolvers: &graph.Resolver{DB: db}},
+			generated.Config{Resolvers: &resolver.Resolver{DB: db}},
 		),
 	)
 	playgroundHandler := playground.Handler("GraphQL", "/query")
@@ -46,7 +46,7 @@ func main() {
 		return nil
 	})
 
-	e.GET("/playground", func(c echo.Context) error {
+	e.GET("/", func(c echo.Context) error {
 		playgroundHandler.ServeHTTP(c.Response(), c.Request())
 		return nil
 	})
