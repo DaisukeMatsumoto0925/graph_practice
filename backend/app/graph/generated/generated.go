@@ -365,7 +365,7 @@ input PaginationInput {
 
 type Mutation {
   createTask(input: NewTask!): Task!
-  updateTask(input: UpdateTask!): Task!
+  updateTask(input: UpdateTask!): Task! @hasRole(role: ADMIN)
 }
 
 type Query {
@@ -623,8 +623,32 @@ func (ec *executionContext) _Mutation_updateTask(ctx context.Context, field grap
 	}
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateTask(rctx, args["input"].(model.UpdateTask))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UpdateTask(rctx, args["input"].(model.UpdateTask))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			role, err := ec.unmarshalNRole2appᚋgraphᚋmodelᚐRole(ctx, "ADMIN")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRole == nil {
+				return nil, errors.New("directive hasRole is not implemented")
+			}
+			return ec.directives.HasRole(ctx, nil, directive0, role)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Task); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *app/graph/model.Task`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

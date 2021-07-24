@@ -6,7 +6,7 @@ schema {
 
 type Mutation {
   createTask(input: NewTask!): Task!
-  updateTask(input: UpdateTask!): Task! @hasRole(role: Role!)
+  updateTask(input: UpdateTask!): Task! @hasRole(role: ADMIN)
 }
 
 type Query {
