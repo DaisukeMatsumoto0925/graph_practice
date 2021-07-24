@@ -26,7 +26,9 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) 
 
 func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
 	var task model.Task
-	r.DB.First(&task, input.ID)
+	if err := r.DB.First(&task, input.ID).Error; err != nil {
+		return nil, err
+	}
 
 	if input.Title == nil && input.Note == nil && input.Completed == nil {
 		return nil, errors.New("could not update a task: params error")
@@ -42,7 +44,7 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 		task.Completed = *input.Completed
 	}
 
-	if err := r.DB.Save(task).Error; err != nil {
+	if err := r.DB.Save(&task).Error; err != nil {
 		return nil, err
 	}
 

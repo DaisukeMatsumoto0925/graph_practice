@@ -3,10 +3,15 @@ package main
 import (
 	"app/config"
 	"app/graph/generated"
+	"app/graph/model"
 	"app/graph/resolver"
+	"context"
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/labstack/echo"
@@ -29,16 +34,31 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Gzip())
+	e.Use(authorize())
 
 	e.GET("/health", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 
+	hasRole := func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (interface{}, error) {
+		token := getToken(ctx)
+		if *token != role.String() {
+			return nil, fmt.Errorf("Access denied")
+		}
+		fmt.Println("authenticate here !")
+		return next(ctx)
+	}
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
-			generated.Config{Resolvers: &resolver.Resolver{DB: db}},
+			generated.Config{
+				Resolvers: &resolver.Resolver{DB: db},
+				Directives: generated.DirectiveRoot{
+					HasRole: hasRole,
+				},
+			},
 		),
 	)
+
 	playgroundHandler := playground.Handler("GraphQL", "/query")
 
 	e.POST("/query", func(c echo.Context) error {
@@ -54,4 +74,40 @@ func main() {
 	e.Logger.SetLevel(elog.INFO)
 	e.HideBanner = true
 	e.Logger.Fatal(e.Start(":3000"))
+}
+
+func authorize() echo.MiddlewareFunc {
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			authHeaderParts := strings.Split(ctx.Request().Header.Get("Authorization"), " ")
+			if len(authHeaderParts) < 2 {
+				return h(ctx)
+			}
+			tokenString := authHeaderParts[1]
+			if tokenString == "" {
+				return h(ctx)
+			}
+			newCtx := setToken(ctx.Request().Context(), tokenString)
+			ctx.SetRequest(ctx.Request().WithContext(newCtx))
+			return h(ctx)
+		}
+	}
+}
+
+type key string
+
+const (
+	tokenKey key = "token"
+)
+
+func setToken(ctx context.Context, token string) context.Context {
+	return context.WithValue(ctx, tokenKey, token)
+}
+
+func getToken(ctx context.Context) *string {
+	token := ctx.Value(tokenKey)
+	if token, ok := token.(string); ok {
+		return &token
+	}
+	return nil
 }
