@@ -3,10 +3,14 @@ package main
 import (
 	"app/config"
 	"app/graph/generated"
+	"app/graph/model"
 	"app/graph/resolver"
+	"context"
+	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/labstack/echo"
@@ -34,11 +38,25 @@ func main() {
 		return c.NoContent(http.StatusOK)
 	})
 
+	hasRole := func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (interface{}, error) {
+		// if !getCurrentUser(ctx).HasRole(role) {
+		// 	// block calling the next resolver
+		// 	return nil, fmt.Errorf("Access denied")
+		// }
+		fmt.Println("authenticate here !")
+		return next(ctx)
+	}
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
-			generated.Config{Resolvers: &resolver.Resolver{DB: db}},
+			generated.Config{
+				Resolvers: &resolver.Resolver{DB: db},
+				Directives: generated.DirectiveRoot{
+					HasRole: hasRole,
+				},
+			},
 		),
 	)
+
 	playgroundHandler := playground.Handler("GraphQL", "/query")
 
 	e.POST("/query", func(c echo.Context) error {

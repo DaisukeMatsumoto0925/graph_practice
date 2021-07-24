@@ -43,6 +43,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -381,6 +382,13 @@ scalar Time
 
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION
+
+directive @hasRole(role: Role!) on FIELD_DEFINITION
+
+enum Role {
+    ADMIN
+    USER
+}
 `, BuiltIn: false},
 	{Name: "graph/task.graphql", Input: `type Task implements Node {
   id: ID!  @goField(forceResolver: true)
@@ -420,6 +428,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.Role
+	if tmp, ok := rawArgs["role"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+		arg0, err = ec.unmarshalNRole2appᚋgraphᚋmodelᚐRole(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["role"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -3119,6 +3142,16 @@ func (ec *executionContext) marshalNPageInfo2ᚖappᚋgraphᚋmodelᚐPageInfo(c
 func (ec *executionContext) unmarshalNPaginationInput2appᚋgraphᚋmodelᚐPaginationInput(ctx context.Context, v interface{}) (model.PaginationInput, error) {
 	res, err := ec.unmarshalInputPaginationInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNRole2appᚋgraphᚋmodelᚐRole(ctx context.Context, v interface{}) (model.Role, error) {
+	var res model.Role
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNRole2appᚋgraphᚋmodelᚐRole(ctx context.Context, sel ast.SelectionSet, v model.Role) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
