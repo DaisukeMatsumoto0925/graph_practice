@@ -38,7 +38,7 @@ type PaginationInput struct {
 }
 
 type Task struct {
-	ID        int       `json:"id"`
+	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	Note      string    `json:"note"`
 	Completed int       `json:"completed"`
@@ -64,7 +64,7 @@ type TaskEdge struct {
 func (TaskEdge) IsEdge() {}
 
 type UpdateTask struct {
-	ID        int     `json:"id"`
+	ID        string  `json:"id"`
 	Title     *string `json:"title"`
 	Note      *string `json:"note"`
 	Completed *int    `json:"completed"`

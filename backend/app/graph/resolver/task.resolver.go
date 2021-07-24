@@ -1,9 +1,11 @@
 package resolver
 
 import (
+	"app/graph/generated"
 	"app/graph/model"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -113,7 +115,7 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 	if input.First != nil || input.After != nil {
 		for i, task := range tasks {
 			newEdge := &model.TaskEdge{
-				Cursor: strconv.Itoa(task.ID),
+				Cursor: task.ID,
 				Node:   task,
 			}
 			nodes = tasks
@@ -122,7 +124,7 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 	} else {
 		for i, task := range tasks {
 			newEdge := &model.TaskEdge{
-				Cursor: strconv.Itoa(task.ID),
+				Cursor: task.ID,
 				Node:   task,
 			}
 			nodes[len(tasks)-1-i] = tasks[i]
@@ -207,7 +209,7 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 	return nil, nil
 }
 
-func (r *queryResolver) Task(ctx context.Context, id int) (*model.Task, error) {
+func (r *queryResolver) Task(ctx context.Context, id string) (*model.Task, error) {
 	var task model.Task
 	if err := r.DB.First(&task, id).Error; err != nil {
 		return nil, err
@@ -215,3 +217,12 @@ func (r *queryResolver) Task(ctx context.Context, id int) (*model.Task, error) {
 
 	return &task, nil
 }
+
+func (r *taskResolver) ID(ctx context.Context, obj *model.Task) (string, error) {
+	return fmt.Sprintf("%s:%s", "TASK", obj.ID), nil
+}
+
+// Task returns generated.TaskResolver implementation.
+func (r *Resolver) Task() generated.TaskResolver { return &taskResolver{r} }
+
+type taskResolver struct{ *Resolver }
