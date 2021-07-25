@@ -1,5 +1,6 @@
 type Task implements Node {
   id: ID!  @goField(forceResolver: true)
+  user_id: ID!
   title: String!
   note: String!
   completed: Int! # 0 or 1

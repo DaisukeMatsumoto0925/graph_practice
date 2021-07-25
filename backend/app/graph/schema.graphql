@@ -5,7 +5,7 @@ schema {
 }
 
 type Mutation {
-  createTask(input: NewTask!): Task!
+  createTask(input: NewTask!): Task! @hasRole(role: ADMIN)
   updateTask(input: UpdateTask!): Task! @hasRole(role: ADMIN)
 }
 
@@ -14,19 +14,20 @@ type Query {
   task(id: ID!): Task!
 }
 
-
 interface Node {
   id: ID!
 }
 
 scalar Time
 
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
-    | FIELD_DEFINITION
+directive @goField(
+  forceResolver: Boolean
+  name: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @hasRole(role: Role!) on FIELD_DEFINITION
 
 enum Role {
-    ADMIN
-    USER
+  ADMIN
+  USER
 }

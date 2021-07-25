@@ -7,19 +7,25 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"time"
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) (*model.Task, error) {
+	var user model.User
+	if err := r.DB.Where("name = ?", "ADMIN").First(&user).Error; err != nil {
+		return nil, err
+	}
+
 	task := model.Task{
+		ID:        "",
+		UserID:    user.ID,
 		Title:     input.Title,
 		Note:      input.Note,
 		Completed: 0,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
 	}
 
-	r.DB.Create(&task)
+	if err := r.DB.Create(&task).Error; err != nil {
+		return nil, err
+	}
 
 	return &task, nil
 }
