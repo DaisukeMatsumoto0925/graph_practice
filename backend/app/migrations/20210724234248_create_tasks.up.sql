@@ -4,8 +4,8 @@ CREATE TABLE tasks (
   title varchar(255) DEFAULT NULL,
   note text DEFAULT NULL,
   completed integer DEFAULT 0,
-  created_at TIMESTAMP DEFAULT NULL,
-  updated_at TIMESTAMP DEFAULT NULL,
+  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY(id),
   CONSTRAINT tasks_fk_user_id
     FOREIGN KEY (`user_id`)
