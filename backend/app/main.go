@@ -2,6 +2,7 @@ package main
 
 import (
 	"app/config"
+	"app/dataloader"
 	"app/graph/generated"
 	"app/graph/model"
 	"app/graph/resolver"
@@ -35,6 +36,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Gzip())
 	e.Use(authorize())
+	e.Use(dataloader.UserLoaderMiddleware())
 
 	e.GET("/health", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)

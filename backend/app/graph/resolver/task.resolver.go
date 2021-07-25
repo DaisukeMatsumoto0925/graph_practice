@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"app/dataloader"
 	"app/domain"
 	"app/graph/generated"
 	"app/graph/model"
@@ -250,11 +251,18 @@ func (r *taskResolver) ID(ctx context.Context, obj *model.Task) (string, error) 
 }
 
 func (r *taskResolver) User(ctx context.Context, obj *model.Task) (*model.User, error) {
-	var user model.User
-	if err := r.DB.Debug().First(&user, obj.UserID).Error; err != nil {
+	// var user model.User
+	// if err := r.DB.Debug().First(&user, obj.UserID).Error; err != nil {
+	// 	return nil, err
+	// }
+	// return &user, nil
+	idInt, _ := strconv.Atoi(obj.UserID)
+	user, err := dataloader.User(ctx, idInt)
+	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+
+	return user, nil
 }
 
 // Task returns generated.TaskResolver implementation.
