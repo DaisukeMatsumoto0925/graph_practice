@@ -1,12 +1,14 @@
 package resolver
 
 import (
+	"app/domain"
 	"app/graph/generated"
 	"app/graph/model"
 	"context"
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) (*model.Task, error) {
@@ -15,19 +17,36 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) 
 		return nil, err
 	}
 
-	task := model.Task{
-		ID:        "",
-		UserID:    user.ID,
+	userID, err := strconv.Atoi(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	task := domain.Task{
+		ID:        0,
+		UserID:    userID,
 		Title:     input.Title,
 		Note:      input.Note,
 		Completed: 0,
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
 	}
 
 	if err := r.DB.Create(&task).Error; err != nil {
 		return nil, err
 	}
 
-	return &task, nil
+	graphTask := model.Task{
+		ID:        strconv.Itoa(task.ID),
+		UserID:    "USER:" + strconv.Itoa(userID),
+		Title:     task.Title,
+		Note:      task.Note,
+		Completed: task.Completed,
+		CreatedAt: task.CreatedAt,
+		UpdatedAt: task.UpdatedAt,
+	}
+
+	return &graphTask, nil
 }
 
 func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
