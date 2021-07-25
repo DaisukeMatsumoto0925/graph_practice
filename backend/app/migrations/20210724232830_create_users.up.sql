@@ -1,8 +1,7 @@
-CREATE TABLE tasks (
+CREATE TABLE users (
   id INT NOT NULL AUTO_INCREMENT,
-  title varchar(255) DEFAULT NULL,
-  note text DEFAULT NULL,
-  completed integer DEFAULT 0,
+  email varchar(255) DEFAULT NULL,
+  name varchar(255) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT NULL,
   updated_at TIMESTAMP DEFAULT NULL,
   PRIMARY KEY(id)
