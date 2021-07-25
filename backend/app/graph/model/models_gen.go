@@ -48,6 +48,7 @@ type Task struct {
 	Completed int       `json:"completed"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	User      *User     `json:"user"`
 }
 
 func (Task) IsNode() {}

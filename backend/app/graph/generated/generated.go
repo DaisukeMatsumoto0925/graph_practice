@@ -72,6 +72,7 @@ type ComplexityRoot struct {
 		Note      func(childComplexity int) int
 		Title     func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
+		User      func(childComplexity int) int
 		UserID    func(childComplexity int) int
 	}
 
@@ -105,6 +106,8 @@ type QueryResolver interface {
 }
 type TaskResolver interface {
 	ID(ctx context.Context, obj *model.Task) (string, error)
+
+	User(ctx context.Context, obj *model.Task) (*model.User, error)
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *model.User) (string, error)
@@ -242,6 +245,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Task.UpdatedAt(childComplexity), true
+
+	case "Task.user":
+		if e.complexity.Task.User == nil {
+			break
+		}
+
+		return e.complexity.Task.User(childComplexity), true
 
 	case "Task.user_id":
 		if e.complexity.Task.UserID == nil {
@@ -447,13 +457,14 @@ enum Role {
 }
 `, BuiltIn: false},
 	{Name: "graph/task.graphql", Input: `type Task implements Node {
-  id: ID!  @goField(forceResolver: true)
+  id: ID! @goField(forceResolver: true)
   user_id: ID!
   title: String!
   note: String!
   completed: Int! # 0 or 1
   created_at: Time!
   updated_at: Time!
+  user: User! @goField(forceResolver: true)
 }
 
 input NewTask {
@@ -1286,6 +1297,41 @@ func (ec *executionContext) _Task_updated_at(ctx context.Context, field graphql.
 	res := resTmp.(time.Time)
 	fc.Result = res
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_user(ctx context.Context, field graphql.CollectedField, obj *model.Task) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Task",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Task().User(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖappᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TaskConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.TaskConnection) (ret graphql.Marshaler) {
@@ -3089,6 +3135,20 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "user":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Task_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3690,6 +3750,20 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 func (ec *executionContext) unmarshalNUpdateTask2appᚋgraphᚋmodelᚐUpdateTask(ctx context.Context, v interface{}) (model.UpdateTask, error) {
 	res, err := ec.unmarshalInputUpdateTask(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUser2appᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+	return ec._User(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUser2ᚖappᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
