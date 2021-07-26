@@ -1,6 +1,8 @@
 package resolver
 
 import (
+	"app/dataloader"
+	"app/domain"
 	"app/graph/generated"
 	"app/graph/model"
 	"context"
@@ -11,17 +13,41 @@ import (
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) (*model.Task, error) {
-	task := model.Task{
+	var user model.User
+	if err := r.DB.Where("name = ?", "ADMIN").First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	userID, err := strconv.Atoi(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	task := domain.Task{
+		ID:        0,
+		UserID:    userID,
 		Title:     input.Title,
 		Note:      input.Note,
 		Completed: 0,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
 	}
 
-	r.DB.Create(&task)
+	if err := r.DB.Create(&task).Error; err != nil {
+		return nil, err
+	}
 
-	return &task, nil
+	graphTask := model.Task{
+		ID:        strconv.Itoa(task.ID),
+		UserID:    "USER:" + strconv.Itoa(userID),
+		Title:     task.Title,
+		Note:      task.Note,
+		Completed: task.Completed,
+		CreatedAt: task.CreatedAt,
+		UpdatedAt: task.UpdatedAt,
+	}
+
+	return &graphTask, nil
 }
 
 func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
@@ -222,6 +248,21 @@ func (r *queryResolver) Task(ctx context.Context, id string) (*model.Task, error
 
 func (r *taskResolver) ID(ctx context.Context, obj *model.Task) (string, error) {
 	return fmt.Sprintf("%s:%s", "TASK", obj.ID), nil
+}
+
+func (r *taskResolver) User(ctx context.Context, obj *model.Task) (*model.User, error) {
+	// var user model.User
+	// if err := r.DB.First(&user, obj.UserID).Error; err != nil {
+	// 	return nil, err
+	// }
+	// return &user, nil
+	idInt, _ := strconv.Atoi(obj.UserID)
+	user, err := dataloader.User(ctx, idInt)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // Task returns generated.TaskResolver implementation.

@@ -42,11 +42,13 @@ type PaginationInput struct {
 
 type Task struct {
 	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
 	Title     string    `json:"title"`
 	Note      string    `json:"note"`
 	Completed int       `json:"completed"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	User      *User     `json:"user"`
 }
 
 func (Task) IsNode() {}
@@ -72,6 +74,16 @@ type UpdateTask struct {
 	Note      *string `json:"note"`
 	Completed *int    `json:"completed"`
 }
+
+type User struct {
+	ID        string    `json:"id"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (User) IsNode() {}
 
 type Role string
 
