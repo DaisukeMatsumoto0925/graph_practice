@@ -5,6 +5,7 @@ import (
 	"app/graph/model"
 	"context"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -24,6 +25,17 @@ func CreateUserLoader(db *gorm.DB) *generated.UserLoader {
 				for i := 0; i < len(ids); i++ {
 					errors[i] = err
 				}
+			}
+
+			userID := map[int]*model.User{}
+			for _, user := range users {
+				idInt, _ := strconv.Atoi(user.ID)
+				userID[idInt] = user
+			}
+
+			results := make([]*model.User, len(ids))
+			for i, id := range ids {
+				results[i] = userID[id]
 			}
 			return users, nil
 		},
