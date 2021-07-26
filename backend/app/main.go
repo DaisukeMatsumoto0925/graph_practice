@@ -15,6 +15,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	elog "github.com/labstack/gommon/log"
@@ -36,7 +37,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Gzip())
 	e.Use(authorize())
-	e.Use(dataloader.UserLoaderMiddleware())
+	e.Use(injectStoreStatusLoader(db.Debug()))
 
 	e.GET("/health", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
@@ -53,7 +54,7 @@ func main() {
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
 			generated.Config{
-				Resolvers: &resolver.Resolver{DB: db},
+				Resolvers: &resolver.Resolver{DB: db.Debug()},
 				Directives: generated.DirectiveRoot{
 					HasRole: hasRole,
 				},
@@ -112,4 +113,16 @@ func getToken(ctx context.Context) *string {
 		return &token
 	}
 	return nil
+}
+
+func injectStoreStatusLoader(db *gorm.DB) echo.MiddlewareFunc {
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			loader := dataloader.CreateUserLoader(db)
+			newCtx := dataloader.SetUserLoader(ctx.Request().Context(), loader)
+
+			ctx.SetRequest(ctx.Request().WithContext(newCtx))
+			return h(ctx)
+		}
+	}
 }
