@@ -1,9 +1,6 @@
 package main
 
 import (
-	"backend2/graph/generated"
-	"backend2/src/graphql/resolver"
-	"backend2/src/middleware/dataloader"
 	"context"
 	"fmt"
 	"net/http"
@@ -13,10 +10,11 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/jinzhu/gorm"
+	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
+	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/resolver"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	elog "github.com/labstack/gommon/log"
+	"gorm.io/gorm"
 )
 
 func main() {
