@@ -2,16 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 	"os"
 	"strings"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
-	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
 	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/resolver"
 	"github.com/DaisukeMatsumoto0925/backend2/src/infra/rdb"
 	"github.com/labstack/echo"
@@ -26,34 +22,19 @@ func main() {
 		panic(err.Error())
 	}
 
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{os.Getenv("CORS_ALLOW_ORIGIN")},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
-	e.Use(middleware.Recover())
-	e.Use(middleware.Logger())
-	e.Use(middleware.Gzip())
-	e.Use(authorize())
-
-	e.GET("/health", func(c echo.Context) error {
-		return c.NoContent(http.StatusOK)
-	})
-
-	hasRole := func(ctx context.Context, obj interface{}, next graphql.Resolver, role gmodel.Role) (interface{}, error) {
-		token := getToken(ctx)
-		if *token != role.String() {
-			return nil, fmt.Errorf("Access denied")
-		}
-		fmt.Println("authenticate here !")
-		return next(ctx)
+	middlewares := []echo.MiddlewareFunc{
+		middleware.Recover(),
+		middleware.Logger(),
+		authorize(),
+		NewCors(),
 	}
+
+	e.Use(middlewares...)
+
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
 			generated.Config{
 				Resolvers: &resolver.Resolver{DB: db.Debug()},
-				Directives: generated.DirectiveRoot{
-					HasRole: hasRole,
-				},
 			},
 		),
 	)
@@ -74,6 +55,8 @@ func main() {
 	e.Logger.Fatal(e.Start(":3000"))
 }
 
+// ---middleware and more------------------------------------------------------------------------
+
 func authorize() echo.MiddlewareFunc {
 	return func(h echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
@@ -90,6 +73,13 @@ func authorize() echo.MiddlewareFunc {
 			return h(ctx)
 		}
 	}
+}
+
+func NewCors() echo.MiddlewareFunc {
+	return middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{os.Getenv("CORS_ALLOW_ORIGIN")},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	})
 }
 
 type key string

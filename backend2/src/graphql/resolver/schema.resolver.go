@@ -6,6 +6,7 @@ package resolver
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
 	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
@@ -24,7 +25,16 @@ func (r *queryResolver) Tasks(ctx context.Context, input gmodel.PaginationInput)
 }
 
 func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &gmodel.Task{
+		ID:        "id",
+		UserID:    "userid",
+		Title:     "",
+		Note:      "",
+		Completed: 0,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		User:      &gmodel.User{},
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

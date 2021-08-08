@@ -12,7 +12,7 @@ import (
 )
 
 func (r *taskResolver) ID(ctx context.Context, obj *gmodel.Task) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return "id", nil
 }
 
 func (r *taskResolver) User(ctx context.Context, obj *gmodel.Task) (*gmodel.User, error) {
