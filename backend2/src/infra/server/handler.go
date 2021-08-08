@@ -8,10 +8,10 @@ import (
 	"github.com/labstack/echo"
 )
 
-func GraphqlHandler(resolver generated.ResolverRoot) echo.HandlerFunc {
+func GraphqlHandler(resolver generated.ResolverRoot, directive generated.DirectiveRoot) echo.HandlerFunc {
 	c := generated.Config{
-		Resolvers: resolver,
-		// Directives: directive,
+		Resolvers:  resolver,
+		Directives: directive,
 	}
 
 	h := handler.New(

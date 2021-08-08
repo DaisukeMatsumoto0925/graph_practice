@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/directive"
 	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/resolver"
 	"github.com/DaisukeMatsumoto0925/backend2/src/infra/rdb"
 	"github.com/DaisukeMatsumoto0925/backend2/src/infra/server"
@@ -20,7 +21,8 @@ func main() {
 	}
 
 	resolver := resolver.New(db)
-	graphqlHandler := server.GraphqlHandler(resolver)
+	directive := directive.New(db)
+	graphqlHandler := server.GraphqlHandler(resolver, directive)
 	router := server.NewRouter(graphqlHandler, middlewares)
 	server.Run(router)
 
