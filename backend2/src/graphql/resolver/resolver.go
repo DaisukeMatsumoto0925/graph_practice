@@ -7,5 +7,13 @@ import "github.com/jinzhu/gorm"
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DB *gorm.DB
+	db *gorm.DB
+}
+
+func New(
+	db *gorm.DB,
+) *Resolver {
+	return &Resolver{
+		db: db,
+	}
 }

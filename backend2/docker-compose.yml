@@ -9,6 +9,7 @@ services:
     volumes:
       - ./:/app
     environment:
+      PORT: 8080
       DB_HOST: db
       DB_PORT: 3306
       DB_USER: root
@@ -16,7 +17,7 @@ services:
       DB_NAME: graphql-app-development
       CORS_ALLOW_ORIGIN: http://localhost:3100
     ports:
-      - 3000:3000
+      - 8080:8080
     depends_on:
       - db
     links:

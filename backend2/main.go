@@ -5,54 +5,29 @@ import (
 	"os"
 	"strings"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
 	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/resolver"
 	"github.com/DaisukeMatsumoto0925/backend2/src/infra/rdb"
+	"github.com/DaisukeMatsumoto0925/backend2/src/infra/server"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
 func main() {
-	e := echo.New()
-
 	db, err := rdb.InitDB()
 	if err != nil {
 		panic(err.Error())
 	}
 
 	middlewares := []echo.MiddlewareFunc{
-		middleware.Recover(),
-		middleware.Logger(),
 		authorize(),
 		NewCors(),
 	}
 
-	e.Use(middlewares...)
+	resolver := resolver.New(db)
+	graphqlHandler := server.GraphqlHandler(resolver)
+	router := server.NewRouter(graphqlHandler, middlewares)
+	server.Run(router)
 
-	graphqlHandler := handler.NewDefaultServer(
-		generated.NewExecutableSchema(
-			generated.Config{
-				Resolvers: &resolver.Resolver{DB: db.Debug()},
-			},
-		),
-	)
-
-	playgroundHandler := playground.Handler("GraphQL", "/query")
-
-	e.POST("/query", func(c echo.Context) error {
-		graphqlHandler.ServeHTTP(c.Response(), c.Request())
-		return nil
-	})
-
-	e.GET("/query", func(c echo.Context) error {
-		playgroundHandler.ServeHTTP(c.Response(), c.Request())
-		return nil
-	})
-
-	e.HideBanner = true
-	e.Logger.Fatal(e.Start(":3000"))
 }
 
 // ---middleware and more------------------------------------------------------------------------

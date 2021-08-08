@@ -15,7 +15,7 @@ func InitDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("connected %v", dbsn())
+	fmt.Printf("DB: connected %v", dbsn())
 	return conn, err
 }
 
