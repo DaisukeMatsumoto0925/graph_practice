@@ -1,14 +1,13 @@
----
 version: '3.7'
 
 services:
   app:
     container_name: graphql-app-backend
     build:
-      context: ./app
+      context: ./
       target: build
     volumes:
-      - ./app:/app
+      - ./:/app
     environment:
       DB_HOST: db
       DB_PORT: 3306
