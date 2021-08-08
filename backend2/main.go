@@ -1,15 +1,11 @@
 package main
 
 import (
-	"context"
-	"os"
-	"strings"
-
 	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/resolver"
 	"github.com/DaisukeMatsumoto0925/backend2/src/infra/rdb"
 	"github.com/DaisukeMatsumoto0925/backend2/src/infra/server"
+	"github.com/DaisukeMatsumoto0925/backend2/src/middleware"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 )
 
 func main() {
@@ -19,8 +15,8 @@ func main() {
 	}
 
 	middlewares := []echo.MiddlewareFunc{
-		authorize(),
-		NewCors(),
+		middleware.Authorize(),
+		middleware.NewCors(),
 	}
 
 	resolver := resolver.New(db)
@@ -32,45 +28,30 @@ func main() {
 
 // ---middleware and more------------------------------------------------------------------------
 
-func authorize() echo.MiddlewareFunc {
-	return func(h echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
-			authHeaderParts := strings.Split(ctx.Request().Header.Get("Authorization"), " ")
-			if len(authHeaderParts) < 2 {
-				return h(ctx)
-			}
-			tokenString := authHeaderParts[1]
-			if tokenString == "" {
-				return h(ctx)
-			}
-			newCtx := setToken(ctx.Request().Context(), tokenString)
-			ctx.SetRequest(ctx.Request().WithContext(newCtx))
-			return h(ctx)
-		}
-	}
-}
+// hasRole := func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (interface{}, error) {
+// 	token := getToken(ctx)
+// 	if *token != role.String() {
+// 		return nil, fmt.Errorf("Access denied")
+// 	}
+// 	fmt.Println("authenticate here !")
+// 	return next(ctx)
+// }
 
-func NewCors() echo.MiddlewareFunc {
-	return middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{os.Getenv("CORS_ALLOW_ORIGIN")},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	})
-}
+// graphqlHandler := handler.NewDefaultServer(
+// 	generated.NewExecutableSchema(
+// 		generated.Config{
+// 			Resolvers: &resolver.Resolver{DB: db.Debug()},
+// 			Directives: generated.DirectiveRoot{
+// 				HasRole: hasRole,
+// 			},
+// 		},
+// 	),
+// )
 
-type key string
-
-const (
-	tokenKey key = "token"
-)
-
-func setToken(ctx context.Context, token string) context.Context {
-	return context.WithValue(ctx, tokenKey, token)
-}
-
-func getToken(ctx context.Context) *string {
-	token := ctx.Value(tokenKey)
-	if token, ok := token.(string); ok {
-		return &token
-	}
-	return nil
-}
+// func getToken(ctx context.Context) *string {
+// 	token := ctx.Value(tokenKey)
+// 	if token, ok := token.(string); ok {
+// 		return &token
+// 	}
+// 	return nil
+// }
