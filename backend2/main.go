@@ -11,16 +11,17 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
+	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
 	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/resolver"
+	"github.com/DaisukeMatsumoto0925/backend2/src/infra/rdb"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"gorm.io/gorm"
 )
 
 func main() {
 	e := echo.New()
 
-	db, err := config.InitDB()
+	db, err := rdb.InitDB()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -33,13 +34,12 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Gzip())
 	e.Use(authorize())
-	e.Use(injectStoreStatusLoader(db.Debug()))
 
 	e.GET("/health", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	})
 
-	hasRole := func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (interface{}, error) {
+	hasRole := func(ctx context.Context, obj interface{}, next graphql.Resolver, role gmodel.Role) (interface{}, error) {
 		token := getToken(ctx)
 		if *token != role.String() {
 			return nil, fmt.Errorf("Access denied")
@@ -70,7 +70,6 @@ func main() {
 		return nil
 	})
 
-	e.Logger.SetLevel(elog.INFO)
 	e.HideBanner = true
 	e.Logger.Fatal(e.Start(":3000"))
 }
@@ -109,16 +108,4 @@ func getToken(ctx context.Context) *string {
 		return &token
 	}
 	return nil
-}
-
-func injectStoreStatusLoader(db *gorm.DB) echo.MiddlewareFunc {
-	return func(h echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
-			loader := dataloader.CreateUserLoader(db)
-			newCtx := dataloader.SetUserLoader(ctx.Request().Context(), loader)
-
-			ctx.SetRequest(ctx.Request().WithContext(newCtx))
-			return h(ctx)
-		}
-	}
 }
