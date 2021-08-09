@@ -7,6 +7,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
 	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
+	"github.com/DaisukeMatsumoto0925/backend2/src/util/appcontext"
 	"github.com/jinzhu/gorm"
 )
 
@@ -22,7 +23,7 @@ func New(db *gorm.DB) generated.DirectiveRoot {
 }
 
 func (d *Directive) HasRole(ctx context.Context, obj interface{}, next graphql.Resolver, role gmodel.Role) (interface{}, error) {
-	token := getToken(ctx)
+	token := appcontext.GetToken(ctx)
 	if token == nil {
 		return nil, fmt.Errorf("ACCESS DENIED")
 	}
@@ -31,13 +32,4 @@ func (d *Directive) HasRole(ctx context.Context, obj interface{}, next graphql.R
 	}
 	fmt.Println("authenticate here !")
 	return next(ctx)
-}
-
-func getToken(ctx context.Context) *string {
-	token := ctx.Value("token")
-	// token := ctx.Value(tokenKey)
-	if token, ok := token.(string); ok {
-		return &token
-	}
-	return nil
 }

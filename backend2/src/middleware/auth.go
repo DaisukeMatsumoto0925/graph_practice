@@ -1,21 +1,11 @@
 package middleware
 
 import (
-	"context"
 	"strings"
 
+	"github.com/DaisukeMatsumoto0925/backend2/src/util/appcontext"
 	"github.com/labstack/echo"
 )
-
-type key string
-
-const (
-	tokenKey key = "token"
-)
-
-func setToken(ctx context.Context, token string) context.Context {
-	return context.WithValue(ctx, tokenKey, token)
-}
 
 func Authorize() echo.MiddlewareFunc {
 	return func(h echo.HandlerFunc) echo.HandlerFunc {
@@ -28,7 +18,7 @@ func Authorize() echo.MiddlewareFunc {
 			if tokenString == "" {
 				return h(ctx)
 			}
-			newCtx := setToken(ctx.Request().Context(), tokenString)
+			newCtx := appcontext.SetToken(ctx.Request().Context(), tokenString)
 			ctx.SetRequest(ctx.Request().WithContext(newCtx))
 			return h(ctx)
 		}
