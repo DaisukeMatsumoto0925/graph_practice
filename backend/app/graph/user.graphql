@@ -1,7 +1,0 @@
-type User implements Node {
-  id: ID!  @goField(forceResolver: true)
-  email: String!
-  name: String!
-  created_at: Time!
-  updated_at: Time!
-}
