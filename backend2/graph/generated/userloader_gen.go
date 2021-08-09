@@ -3,7 +3,7 @@
 package generated
 
 import (
-	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
+	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
 	"sync"
 	"time"
 )

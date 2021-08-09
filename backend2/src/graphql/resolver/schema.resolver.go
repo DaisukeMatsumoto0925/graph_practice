@@ -3,7 +3,7 @@ package resolver
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
 
-import "github.com/DaisukeMatsumoto0925/backend2/graph/generated"
+import "github.com/DaisukeMatsumoto0925/backend/graph/generated"
 
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }

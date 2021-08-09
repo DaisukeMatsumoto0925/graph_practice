@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
-	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
+	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
+	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
 )
 
 func (r *userResolver) ID(ctx context.Context, obj *gmodel.User) (string, error) {

@@ -4,7 +4,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
+	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
 	"github.com/labstack/echo"
 )
 

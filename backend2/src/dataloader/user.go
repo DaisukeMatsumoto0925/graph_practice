@@ -8,8 +8,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
-	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
+	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
+	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
 )
 
 type loaderKey string

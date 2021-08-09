@@ -16,7 +16,7 @@ model:
   package: gmodel
 
 autobind:
-  - "github.com/DaisukeMatsumoto0925/backend2/graph/model"
+  - "github.com/DaisukeMatsumoto0925/backend/graph/model"
 
 models:
   ID:

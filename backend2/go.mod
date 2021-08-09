@@ -1,4 +1,4 @@
-module github.com/DaisukeMatsumoto0925/backend2
+module github.com/DaisukeMatsumoto0925/backend
 
 go 1.16
 

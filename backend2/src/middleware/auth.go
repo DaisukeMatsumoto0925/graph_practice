@@ -3,7 +3,7 @@ package middleware
 import (
 	"strings"
 
-	"github.com/DaisukeMatsumoto0925/backend2/src/util/appcontext"
+	"github.com/DaisukeMatsumoto0925/backend/src/util/appcontext"
 	"github.com/labstack/echo"
 )
 

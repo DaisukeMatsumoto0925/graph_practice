@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
-	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
-	"github.com/DaisukeMatsumoto0925/backend2/src/dataloader"
-	"github.com/DaisukeMatsumoto0925/backend2/src/domain"
+	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
+	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
+	"github.com/DaisukeMatsumoto0925/backend/src/dataloader"
+	"github.com/DaisukeMatsumoto0925/backend/src/domain"
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input gmodel.NewTask) (*gmodel.Task, error) {

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/directive"
-	"github.com/DaisukeMatsumoto0925/backend2/src/graphql/resolver"
-	"github.com/DaisukeMatsumoto0925/backend2/src/infra/rdb"
-	"github.com/DaisukeMatsumoto0925/backend2/src/infra/server"
-	"github.com/DaisukeMatsumoto0925/backend2/src/middleware"
+	"github.com/DaisukeMatsumoto0925/backend/src/graphql/directive"
+	"github.com/DaisukeMatsumoto0925/backend/src/graphql/resolver"
+	"github.com/DaisukeMatsumoto0925/backend/src/infra/rdb"
+	"github.com/DaisukeMatsumoto0925/backend/src/infra/server"
+	"github.com/DaisukeMatsumoto0925/backend/src/middleware"
 	"github.com/labstack/echo"
 )
 

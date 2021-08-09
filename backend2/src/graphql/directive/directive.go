@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
-	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
-	"github.com/DaisukeMatsumoto0925/backend2/src/util/appcontext"
+	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
+	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
+	"github.com/DaisukeMatsumoto0925/backend/src/util/appcontext"
 	"github.com/jinzhu/gorm"
 )
 

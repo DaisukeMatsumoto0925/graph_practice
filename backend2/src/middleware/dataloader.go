@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/DaisukeMatsumoto0925/backend2/src/dataloader"
+	"github.com/DaisukeMatsumoto0925/backend/src/dataloader"
 	"github.com/labstack/echo"
 
 	"github.com/jinzhu/gorm"
