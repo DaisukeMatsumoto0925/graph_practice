@@ -1,24 +1,29 @@
 package dataloader
 
 import (
-	"app/graph/generated"
-	"app/graph/model"
 	"context"
 	"errors"
 	"strconv"
 	"time"
 
 	"github.com/jinzhu/gorm"
+
+	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
+	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
 )
 
-const userLoadersKey = "userLoader"
+type loaderKey string
+
+const (
+	userLoadersKey loaderKey = "userLoader"
+)
 
 func CreateUserLoader(db *gorm.DB) *generated.UserLoader {
 	return generated.NewUserLoader(generated.UserLoaderConfig{
 		MaxBatch: 100,
 		Wait:     1 * time.Millisecond,
-		Fetch: func(ids []int) ([]*model.User, []error) {
-			var users []*model.User
+		Fetch: func(ids []int) ([]*gmodel.User, []error) {
+			var users []*gmodel.User
 			errors := make([]error, len(ids))
 			err := db.Where("id IN (?)", ids).Find(&users).Error
 			if err != nil {
@@ -27,22 +32,22 @@ func CreateUserLoader(db *gorm.DB) *generated.UserLoader {
 				}
 			}
 
-			userID := map[int]*model.User{}
+			userIDs := map[int]*gmodel.User{}
 			for _, user := range users {
 				idInt, _ := strconv.Atoi(user.ID)
-				userID[idInt] = user
+				userIDs[idInt] = user
 			}
 
-			results := make([]*model.User, len(ids))
+			results := make([]*gmodel.User, len(ids))
 			for i, id := range ids {
-				results[i] = userID[id]
+				results[i] = userIDs[id]
 			}
-			return users, nil
+			return results, nil
 		},
 	})
 }
 
-func User(ctx context.Context, id int) (*model.User, error) {
+func User(ctx context.Context, id int) (*gmodel.User, error) {
 	v := ctx.Value(userLoadersKey)
 	if v == nil {
 		panic("not found operator loader, must inject")

@@ -1,20 +1,21 @@
 package resolver
 
 import (
-	"app/dataloader"
-	"app/domain"
-	"app/graph/generated"
-	"app/graph/model"
 	"context"
 	"errors"
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
+	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
+	"github.com/DaisukeMatsumoto0925/backend/src/dataloader"
+	"github.com/DaisukeMatsumoto0925/backend/src/domain"
 )
 
-func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) (*model.Task, error) {
-	var user model.User
-	if err := r.DB.Where("name = ?", "ADMIN").First(&user).Error; err != nil {
+func (r *mutationResolver) CreateTask(ctx context.Context, input gmodel.NewTask) (*gmodel.Task, error) {
+	var user gmodel.User
+	if err := r.db.Where("name = ?", "ADMIN").First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -33,11 +34,11 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) 
 		UpdatedAt: time.Time{},
 	}
 
-	if err := r.DB.Create(&task).Error; err != nil {
+	if err := r.db.Create(&task).Error; err != nil {
 		return nil, err
 	}
 
-	graphTask := model.Task{
+	graphTask := gmodel.Task{
 		ID:        strconv.Itoa(task.ID),
 		UserID:    "USER:" + strconv.Itoa(userID),
 		Title:     task.Title,
@@ -50,9 +51,9 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.NewTask) 
 	return &graphTask, nil
 }
 
-func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTask) (*model.Task, error) {
-	var task model.Task
-	if err := r.DB.First(&task, input.ID).Error; err != nil {
+func (r *mutationResolver) UpdateTask(ctx context.Context, input gmodel.UpdateTask) (*gmodel.Task, error) {
+	var task gmodel.Task
+	if err := r.db.First(&task, input.ID).Error; err != nil {
 		return nil, err
 	}
 
@@ -70,14 +71,14 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 		task.Completed = *input.Completed
 	}
 
-	if err := r.DB.Save(&task).Error; err != nil {
+	if err := r.db.Save(&task).Error; err != nil {
 		return nil, err
 	}
 
 	return &task, nil
 }
 
-func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) (*model.TaskConnection, error) {
+func (r *queryResolver) Tasks(ctx context.Context, input gmodel.PaginationInput) (*gmodel.TaskConnection, error) {
 	// validation
 	if input.First == nil && input.Last == nil {
 		return nil, errors.New("input.First or input.Last is required: input error")
@@ -103,8 +104,8 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 		return nil, errors.New("input.Last exceeds tasksSizeLimit: input error ")
 	}
 
-	db := r.DB
-	var tasks []*model.Task
+	db := r.db
+	var tasks []*gmodel.Task
 
 	if input.After != nil {
 		db = db.Where("id > ?", *input.After)
@@ -124,25 +125,25 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 
 	//検索結果0の場合
 	if len(tasks) == 0 {
-		return &model.TaskConnection{
-			PageInfo: &model.PageInfo{
+		return &gmodel.TaskConnection{
+			PageInfo: &gmodel.PageInfo{
 				StartCursor:     nil,
 				EndCursor:       nil,
 				HasNextPage:     false,
 				HasPreviousPage: false,
 			},
-			Edges: []*model.TaskEdge{},
-			Nodes: []*model.Task{},
+			Edges: []*gmodel.TaskEdge{},
+			Nodes: []*gmodel.Task{},
 		}, nil
 	}
 
-	edges := make([]*model.TaskEdge, len(tasks))
-	nodes := make([]*model.Task, len(tasks))
+	edges := make([]*gmodel.TaskEdge, len(tasks))
+	nodes := make([]*gmodel.Task, len(tasks))
 
 	// last, before 指定の時はスライスの後ろから入れていく
 	if input.First != nil || input.After != nil {
 		for i, task := range tasks {
-			newEdge := &model.TaskEdge{
+			newEdge := &gmodel.TaskEdge{
 				Cursor: task.ID,
 				Node:   task,
 			}
@@ -151,7 +152,7 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 		}
 	} else {
 		for i, task := range tasks {
-			newEdge := &model.TaskEdge{
+			newEdge := &gmodel.TaskEdge{
 				Cursor: task.ID,
 				Node:   task,
 			}
@@ -169,13 +170,13 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 	// startCursorのIDより前に1件でもデータがある場合はpreviousPageはtrue
 	startCursorInt, _ := strconv.Atoi(startCursor)
 	endCursorInt, _ := strconv.Atoi(endCursor)
-	var task model.Task
+	var task gmodel.Task
 	if input.First != nil {
-		if err := r.DB.Where("id <= ?", startCursorInt-1).First(&task).Error; err == nil {
+		if err := r.db.Where("id <= ?", startCursorInt-1).First(&task).Error; err == nil {
 			hasPreviousPage = true
 		}
 	} else {
-		if err := r.DB.Where("id >= ?", endCursorInt+1).First(&task).Error; err == nil {
+		if err := r.db.Where("id >= ?", endCursorInt+1).First(&task).Error; err == nil {
 			hasNextPage = true
 		}
 	}
@@ -184,8 +185,8 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 	if input.First != nil && limit < len(nodes) {
 		endCursor = edges[len(edges)-2].Cursor
 		hasNextPage = true
-		return &model.TaskConnection{
-			PageInfo: &model.PageInfo{
+		return &gmodel.TaskConnection{
+			PageInfo: &gmodel.PageInfo{
 				StartCursor:     &startCursor,
 				EndCursor:       &endCursor,
 				HasNextPage:     hasNextPage,
@@ -195,8 +196,8 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 			Nodes: nodes[:len(nodes)-1],
 		}, nil
 	} else if input.First != nil && limit >= len(nodes) {
-		return &model.TaskConnection{
-			PageInfo: &model.PageInfo{
+		return &gmodel.TaskConnection{
+			PageInfo: &gmodel.PageInfo{
 				StartCursor:     &startCursor,
 				EndCursor:       &endCursor,
 				HasNextPage:     hasNextPage,
@@ -211,8 +212,8 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 	if input.Last != nil && limit < len(nodes) {
 		startCursor = edges[len(edges)-limit].Cursor
 		hasPreviousPage = true
-		return &model.TaskConnection{
-			PageInfo: &model.PageInfo{
+		return &gmodel.TaskConnection{
+			PageInfo: &gmodel.PageInfo{
 				StartCursor:     &startCursor,
 				EndCursor:       &endCursor,
 				HasNextPage:     hasNextPage,
@@ -222,8 +223,8 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 			Nodes: nodes[len(nodes)-limit:],
 		}, nil
 	} else if input.Last != nil && limit >= len(nodes) {
-		return &model.TaskConnection{
-			PageInfo: &model.PageInfo{
+		return &gmodel.TaskConnection{
+			PageInfo: &gmodel.PageInfo{
 				StartCursor:     &startCursor,
 				EndCursor:       &endCursor,
 				HasNextPage:     hasNextPage,
@@ -237,25 +238,20 @@ func (r *queryResolver) Tasks(ctx context.Context, input model.PaginationInput) 
 	return nil, nil
 }
 
-func (r *queryResolver) Task(ctx context.Context, id string) (*model.Task, error) {
-	var task model.Task
-	if err := r.DB.First(&task, id).Error; err != nil {
+func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, error) {
+	var task gmodel.Task
+	if err := r.db.First(&task, id).Error; err != nil {
 		return nil, err
 	}
 
 	return &task, nil
 }
 
-func (r *taskResolver) ID(ctx context.Context, obj *model.Task) (string, error) {
+func (r *taskResolver) ID(ctx context.Context, obj *gmodel.Task) (string, error) {
 	return fmt.Sprintf("%s:%s", "TASK", obj.ID), nil
 }
 
-func (r *taskResolver) User(ctx context.Context, obj *model.Task) (*model.User, error) {
-	// var user model.User
-	// if err := r.DB.First(&user, obj.UserID).Error; err != nil {
-	// 	return nil, err
-	// }
-	// return &user, nil
+func (r *taskResolver) User(ctx context.Context, obj *gmodel.Task) (*gmodel.User, error) {
 	idInt, _ := strconv.Atoi(obj.UserID)
 	user, err := dataloader.User(ctx, idInt)
 	if err != nil {
