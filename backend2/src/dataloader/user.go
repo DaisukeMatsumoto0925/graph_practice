@@ -28,17 +28,17 @@ func CreateUserLoader(db *gorm.DB) *generated.UserLoader {
 				}
 			}
 
-			userID := map[int]*gmodel.User{}
+			userIDs := map[int]*gmodel.User{}
 			for _, user := range users {
 				idInt, _ := strconv.Atoi(user.ID)
-				userID[idInt] = user
+				userIDs[idInt] = user
 			}
 
 			results := make([]*gmodel.User, len(ids))
 			for i, id := range ids {
-				results[i] = userID[id]
+				results[i] = userIDs[id]
 			}
-			return users, nil
+			return results, nil
 		},
 	})
 }
