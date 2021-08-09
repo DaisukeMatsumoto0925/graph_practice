@@ -12,7 +12,11 @@ import (
 	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
 )
 
-const userLoadersKey = "userLoader"
+type loaderKey string
+
+const (
+	userLoadersKey loaderKey = "userLoader"
+)
 
 func CreateUserLoader(db *gorm.DB) *generated.UserLoader {
 	return generated.NewUserLoader(generated.UserLoaderConfig{
