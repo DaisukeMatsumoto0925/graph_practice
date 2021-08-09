@@ -9,6 +9,7 @@ import (
 
 	"github.com/DaisukeMatsumoto0925/backend2/graph/generated"
 	gmodel "github.com/DaisukeMatsumoto0925/backend2/graph/model"
+	"github.com/DaisukeMatsumoto0925/backend2/src/dataloader"
 	"github.com/DaisukeMatsumoto0925/backend2/src/domain"
 )
 
@@ -251,18 +252,13 @@ func (r *taskResolver) ID(ctx context.Context, obj *gmodel.Task) (string, error)
 }
 
 func (r *taskResolver) User(ctx context.Context, obj *gmodel.Task) (*gmodel.User, error) {
-	var user gmodel.User
-	if err := r.db.First(&user, obj.UserID).Error; err != nil {
+	idInt, _ := strconv.Atoi(obj.UserID)
+	user, err := dataloader.User(ctx, idInt)
+	if err != nil {
 		return nil, err
 	}
-	return &user, nil
-	// idInt, _ := strconv.Atoi(obj.UserID)
-	// user, err := dataloader.User(ctx, idInt)
-	// if err != nil {
-	// 	return nil, err
-	// }
 
-	// return user, nil
+	return user, nil
 }
 
 // Task returns generated.TaskResolver implementation.
