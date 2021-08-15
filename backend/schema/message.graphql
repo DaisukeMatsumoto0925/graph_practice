@@ -1,0 +1,14 @@
+type Message implements Node {
+  id: ID!
+  user: User!
+  message: String!
+}
+
+input JoinUserInput {
+  userID: ID!
+}
+
+input PostMessageInput {
+  userID: ID!
+  message: String!
+}

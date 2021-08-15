@@ -21,6 +21,18 @@ type Node interface {
 	IsNode()
 }
 
+type JoinUserInput struct {
+	UserID string `json:"userID"`
+}
+
+type Message struct {
+	ID      string `json:"id"`
+	User    *User  `json:"user"`
+	Message string `json:"message"`
+}
+
+func (Message) IsNode() {}
+
 type NewTask struct {
 	Title string `json:"title"`
 	Note  string `json:"note"`
@@ -38,6 +50,11 @@ type PaginationInput struct {
 	After  *string `json:"after"`
 	Last   *int    `json:"last"`
 	Before *string `json:"before"`
+}
+
+type PostMessageInput struct {
+	UserID  string `json:"userID"`
+	Message string `json:"message"`
 }
 
 type Task struct {

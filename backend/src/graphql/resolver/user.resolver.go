@@ -12,6 +12,10 @@ func (r *userResolver) ID(ctx context.Context, obj *gmodel.User) (string, error)
 	return fmt.Sprintf("%s:%s", "USER", obj.ID), nil
 }
 
+func (r *mutationResolver) JoinUser(ctx context.Context, obj gmodel.JoinUserInput) (*gmodel.User, error) {
+	return nil, nil
+}
+
 // User returns generated.UserResolver implementation.
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
