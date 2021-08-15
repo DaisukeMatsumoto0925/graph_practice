@@ -38,3 +38,9 @@ services:
     ports:
       - 3306:3306
     tty: true
+
+  redis:
+    build:
+      context: ./redis/docker
+    ports:
+      - "6379:6379"
