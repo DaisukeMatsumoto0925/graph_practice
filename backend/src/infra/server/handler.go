@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/99designs/gqlgen/handler"
@@ -18,6 +19,7 @@ func GraphqlHandler(resolver generated.ResolverRoot, directive generated.Directi
 
 	h := handler.GraphQL(
 		generated.NewExecutableSchema(c),
+		handler.WebsocketKeepAliveDuration(10*time.Second),
 		handler.WebsocketUpgrader(websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
