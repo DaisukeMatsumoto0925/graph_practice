@@ -1,17 +1,24 @@
 schema {
   query: Query
   mutation: Mutation
-  # subscription: Subscription
+  subscription: Subscription
 }
 
 type Mutation {
   createTask(input: NewTask!): Task! @hasRole(role: ADMIN)
   updateTask(input: UpdateTask!): Task! @hasRole(role: ADMIN)
+  joinUser(input: JoinUserInput!): User!
+  postMessage(input: PostMessageInput!): Message!
 }
 
 type Query {
   tasks(input: PaginationInput!): TaskConnection!
   task(id: ID!): Task!
+}
+
+type Subscription {
+  messagePosted(userID: ID): Message!
+  userJoined(userID: ID): User!
 }
 
 interface Node {

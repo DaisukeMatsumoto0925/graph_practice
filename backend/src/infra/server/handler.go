@@ -1,11 +1,13 @@
 package server
 
 import (
-	// "github.com/99designs/gqlgen/graphql/handler"
-	// "github.com/99designs/gqlgen/graphql/handler/transport"
+	"net/http"
+	"time"
+
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/99designs/gqlgen/handler"
 	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 )
 
@@ -17,6 +19,12 @@ func GraphqlHandler(resolver generated.ResolverRoot, directive generated.Directi
 
 	h := handler.GraphQL(
 		generated.NewExecutableSchema(c),
+		handler.WebsocketKeepAliveDuration(10*time.Second),
+		handler.WebsocketUpgrader(websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		}),
 	)
 
 	// NOTE: handler.Newが推奨だが playgroundのdocsが読み込まれない？

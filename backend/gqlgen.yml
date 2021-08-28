@@ -1,8 +1,8 @@
-resolver:
-  layout: follow-schema
-  dir: src/graphql/resolver
-  package: resolver
-  filename_template: "{name}.resolver.go"
+# resolver:
+#   layout: follow-schema
+#   dir: src/graphql/resolver
+#   package: resolver
+#   filename_template: "{name}.resolver.go"
 
 schema:
   - schema/**/*.graphql
