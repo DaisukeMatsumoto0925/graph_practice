@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -84,8 +85,8 @@ func (m *MessageSubscriber) SetNx(ctx context.Context, userID string) error {
 		log.Println(err)
 		return err
 	}
-	if val == false {
-		return errors.New("This User name has already used")
+	if !val {
+		return errors.New("this user name has already used")
 	}
 
 	m.mutex.Lock()
@@ -99,6 +100,7 @@ func (m *MessageSubscriber) SetNx(ctx context.Context, userID string) error {
 func (m *MessageSubscriber) startSubscribingRedis(ctx context.Context) error {
 	var err error
 	go func() {
+		fmt.Println("hhiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
 		pubsub := m.client.Subscribe(ctx, "room")
 		defer pubsub.Close()
 
@@ -109,7 +111,7 @@ func (m *MessageSubscriber) startSubscribingRedis(ctx context.Context) error {
 			}
 			switch msg := msgi.(type) {
 			case *redis.Message:
-				ms := gmodel.Message{}
+				var ms gmodel.Message
 				if err := json.Unmarshal([]byte(msg.Payload), &ms); err != nil {
 					continue
 				}
