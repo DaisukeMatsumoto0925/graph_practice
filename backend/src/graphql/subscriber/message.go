@@ -85,8 +85,8 @@ func (m *MessageSubscriber) SetNx(ctx context.Context, userID string) error {
 		log.Println(err)
 		return err
 	}
-	if val == false {
-		return errors.New("This User name has already used")
+	if !val {
+		return errors.New("this user name has already used")
 	}
 
 	m.mutex.Lock()
