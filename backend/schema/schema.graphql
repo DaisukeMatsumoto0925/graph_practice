@@ -9,6 +9,8 @@ type Mutation {
   updateTask(input: UpdateTask!): Task! @hasRole(role: ADMIN)
   joinUser(input: JoinUserInput!): User!
   postMessage(input: PostMessageInput!): Message!
+
+  uploadFile(input: UploadFileInput!): UploadFilePayload!
 }
 
 type Query {
@@ -26,6 +28,7 @@ interface Node {
 }
 
 scalar Time
+scalar Upload
 
 directive @goField(
   forceResolver: Boolean
