@@ -4,6 +4,10 @@ go 1.16
 
 require (
 	github.com/99designs/gqlgen v0.13.0
+	github.com/aws/aws-sdk-go-v2 v1.9.0
+	github.com/aws/aws-sdk-go-v2/config v1.8.0
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.5.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.15.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-redis/redis/v8 v8.11.3
 	github.com/go-sql-driver/mysql v1.6.0
