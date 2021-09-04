@@ -1,4 +1,4 @@
-FROM golang:1.13.4-alpine3.10 as build
+FROM golang:1.17.0-alpine3.14 as build
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ RUN GO111MODULE=off go get github.com/oxequa/realize
 RUN GO111MODULE=off go get -tags 'mysql' -u github.com/golang-migrate/migrate/cmd/migrate
 
 
-FROM alpine:3.10
+FROM alpine:3.14
 
 WORKDIR /app
 
