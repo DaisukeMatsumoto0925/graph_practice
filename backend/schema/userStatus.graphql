@@ -1,14 +1,14 @@
 type UserStatus {
   userId: ID!
-  status: State!
+  status: Status!
 }
 
-enum State {
+enum Status {
   ONLINE
   OFFLINE
 }
 
 input updateUserStatusInput {
   userID: ID!
-  message: String!
+  status: Status!
 }
