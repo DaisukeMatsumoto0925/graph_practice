@@ -1,0 +1,14 @@
+type UserStatus {
+  userId: ID!
+  status: State!
+}
+
+enum State {
+  ONLINE
+  OFFLINE
+}
+
+input updateUserStatusInput {
+  userID: ID!
+  message: String!
+}

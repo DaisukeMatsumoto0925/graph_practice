@@ -9,6 +9,8 @@ type Mutation {
   updateTask(input: UpdateTask!): Task! @hasRole(role: ADMIN)
   joinUser(input: JoinUserInput!): User!
   postMessage(input: PostMessageInput!): Message!
+  # key space
+  updateUserStatus(input: updateUserStatusInput!): UserStatus!
 }
 
 type Query {
@@ -19,6 +21,8 @@ type Query {
 type Subscription {
   messagePosted(userID: ID): Message!
   userJoined(userID: ID): User!
+  # key space
+  userStatusChanged(userId: String!): UserStatus!
 }
 
 interface Node {

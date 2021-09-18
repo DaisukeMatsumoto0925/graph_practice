@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -100,7 +99,6 @@ func (m *MessageSubscriber) SetNx(ctx context.Context, userID string) error {
 func (m *MessageSubscriber) startSubscribingRedis(ctx context.Context) error {
 	var err error
 	go func() {
-		fmt.Println("hhiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
 		pubsub := m.client.Subscribe(ctx, "room")
 		defer pubsub.Close()
 

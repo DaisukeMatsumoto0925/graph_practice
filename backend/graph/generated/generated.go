@@ -57,10 +57,11 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateTask  func(childComplexity int, input gmodel.NewTask) int
-		JoinUser    func(childComplexity int, input gmodel.JoinUserInput) int
-		PostMessage func(childComplexity int, input gmodel.PostMessageInput) int
-		UpdateTask  func(childComplexity int, input gmodel.UpdateTask) int
+		CreateTask       func(childComplexity int, input gmodel.NewTask) int
+		JoinUser         func(childComplexity int, input gmodel.JoinUserInput) int
+		PostMessage      func(childComplexity int, input gmodel.PostMessageInput) int
+		UpdateTask       func(childComplexity int, input gmodel.UpdateTask) int
+		UpdateUserStatus func(childComplexity int, input gmodel.UpdateUserStatusInput) int
 	}
 
 	PageInfo struct {
@@ -76,8 +77,9 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		MessagePosted func(childComplexity int, userID *string) int
-		UserJoined    func(childComplexity int, userID *string) int
+		MessagePosted     func(childComplexity int, userID *string) int
+		UserJoined        func(childComplexity int, userID *string) int
+		UserStatusChanged func(childComplexity int, userID string) int
 	}
 
 	Task struct {
@@ -109,6 +111,11 @@ type ComplexityRoot struct {
 		Name      func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 	}
+
+	UserStatus struct {
+		Status func(childComplexity int) int
+		UserID func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
@@ -116,6 +123,7 @@ type MutationResolver interface {
 	UpdateTask(ctx context.Context, input gmodel.UpdateTask) (*gmodel.Task, error)
 	JoinUser(ctx context.Context, input gmodel.JoinUserInput) (*gmodel.User, error)
 	PostMessage(ctx context.Context, input gmodel.PostMessageInput) (*gmodel.Message, error)
+	UpdateUserStatus(ctx context.Context, input gmodel.UpdateUserStatusInput) (*gmodel.UserStatus, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, input gmodel.PaginationInput) (*gmodel.TaskConnection, error)
@@ -124,6 +132,7 @@ type QueryResolver interface {
 type SubscriptionResolver interface {
 	MessagePosted(ctx context.Context, userID *string) (<-chan *gmodel.Message, error)
 	UserJoined(ctx context.Context, userID *string) (<-chan *gmodel.User, error)
+	UserStatusChanged(ctx context.Context, userID string) (<-chan *gmodel.UserStatus, error)
 }
 type TaskResolver interface {
 	ID(ctx context.Context, obj *gmodel.Task) (string, error)
@@ -218,6 +227,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateTask(childComplexity, args["input"].(gmodel.UpdateTask)), true
 
+	case "Mutation.updateUserStatus":
+		if e.complexity.Mutation.UpdateUserStatus == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUserStatus_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUserStatus(childComplexity, args["input"].(gmodel.UpdateUserStatusInput)), true
+
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
 			break
@@ -293,6 +314,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.UserJoined(childComplexity, args["userID"].(*string)), true
+
+	case "Subscription.userStatusChanged":
+		if e.complexity.Subscription.UserStatusChanged == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_userStatusChanged_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.UserStatusChanged(childComplexity, args["userId"].(string)), true
 
 	case "Task.completed":
 		if e.complexity.Task.Completed == nil {
@@ -419,6 +452,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.UpdatedAt(childComplexity), true
+
+	case "UserStatus.status":
+		if e.complexity.UserStatus.Status == nil {
+			break
+		}
+
+		return e.complexity.UserStatus.Status(childComplexity), true
+
+	case "UserStatus.userId":
+		if e.complexity.UserStatus.UserID == nil {
+			break
+		}
+
+		return e.complexity.UserStatus.UserID(childComplexity), true
 
 	}
 	return 0, false
@@ -555,6 +602,8 @@ type Mutation {
   updateTask(input: UpdateTask!): Task! @hasRole(role: ADMIN)
   joinUser(input: JoinUserInput!): User!
   postMessage(input: PostMessageInput!): Message!
+  # key space
+  updateUserStatus(input: updateUserStatusInput!): UserStatus!
 }
 
 type Query {
@@ -565,6 +614,8 @@ type Query {
 type Subscription {
   messagePosted(userID: ID): Message!
   userJoined(userID: ID): User!
+    # key space
+  userStatusChanged(userId: String!): UserStatus!
 }
 
 interface Node {
@@ -625,6 +676,22 @@ type TaskEdge implements Edge {
   name: String!
   created_at: Time!
   updated_at: Time!
+}
+`, BuiltIn: false},
+	{Name: "schema/userStatus.graphql", Input: `type UserStatus {
+  
+  userId: ID!
+  status: State!
+}
+
+enum State {
+  ONLINE
+  OFFLINE
+}
+
+input updateUserStatusInput {
+  userID: ID!
+  message: String!
 }
 `, BuiltIn: false},
 }
@@ -709,6 +776,21 @@ func (ec *executionContext) field_Mutation_updateTask_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateUserStatus_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 gmodel.UpdateUserStatusInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNupdateUserStatusInput2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUpdateUserStatusInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -781,6 +863,21 @@ func (ec *executionContext) field_Subscription_userJoined_args(ctx context.Conte
 		}
 	}
 	args["userID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_userStatusChanged_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userId"] = arg0
 	return args, nil
 }
 
@@ -1141,6 +1238,48 @@ func (ec *executionContext) _Mutation_postMessage(ctx context.Context, field gra
 	res := resTmp.(*gmodel.Message)
 	fc.Result = res
 	return ec.marshalNMessage2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateUserStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateUserStatus_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUserStatus(rctx, args["input"].(gmodel.UpdateUserStatusInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*gmodel.UserStatus)
+	fc.Result = res
+	return ec.marshalNUserStatus2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUserStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field graphql.CollectedField, obj *gmodel.PageInfo) (ret graphql.Marshaler) {
@@ -1531,6 +1670,58 @@ func (ec *executionContext) _Subscription_userJoined(ctx context.Context, field 
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
 			ec.marshalNUser2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUser(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Subscription_userStatusChanged(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_userStatusChanged_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().UserStatusChanged(rctx, args["userId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *gmodel.UserStatus)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNUserStatus2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUserStatus(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -2164,6 +2355,76 @@ func (ec *executionContext) _User_updated_at(ctx context.Context, field graphql.
 	res := resTmp.(time.Time)
 	fc.Result = res
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserStatus_userId(ctx context.Context, field graphql.CollectedField, obj *gmodel.UserStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UserStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _UserStatus_status(ctx context.Context, field graphql.CollectedField, obj *gmodel.UserStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "UserStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(gmodel.State)
+	fc.Result = res
+	return ec.marshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3417,6 +3678,34 @@ func (ec *executionContext) unmarshalInputUpdateTask(ctx context.Context, obj in
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputupdateUserStatusInput(ctx context.Context, obj interface{}) (gmodel.UpdateUserStatusInput, error) {
+	var it gmodel.UpdateUserStatusInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "userID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+			it.UserID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "message":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
+			it.Message, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3559,6 +3848,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "updateUserStatus":
+			out.Values[i] = ec._Mutation_updateUserStatus(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3681,6 +3975,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_messagePosted(ctx, fields[0])
 	case "userJoined":
 		return ec._Subscription_userJoined(ctx, fields[0])
+	case "userStatusChanged":
+		return ec._Subscription_userStatusChanged(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -3879,6 +4175,38 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_updated_at(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var userStatusImplementors = []string{"UserStatus"}
+
+func (ec *executionContext) _UserStatus(ctx context.Context, sel ast.SelectionSet, obj *gmodel.UserStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserStatus")
+		case "userId":
+			out.Values[i] = ec._UserStatus_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "status":
+			out.Values[i] = ec._UserStatus_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -4235,6 +4563,16 @@ func (ec *executionContext) marshalNRole2githubᚗcomᚋDaisukeMatsumoto0925ᚋb
 	return v
 }
 
+func (ec *executionContext) unmarshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx context.Context, v interface{}) (gmodel.State, error) {
+	var res gmodel.State
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx context.Context, sel ast.SelectionSet, v gmodel.State) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4394,6 +4732,20 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋDaisukeMatsumoto0925�
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUserStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUserStatus(ctx context.Context, sel ast.SelectionSet, v gmodel.UserStatus) graphql.Marshaler {
+	return ec._UserStatus(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUserStatus2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUserStatus(ctx context.Context, sel ast.SelectionSet, v *gmodel.UserStatus) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._UserStatus(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4623,6 +4975,11 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNupdateUserStatusInput2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUpdateUserStatusInput(ctx context.Context, v interface{}) (gmodel.UpdateUserStatusInput, error) {
+	res, err := ec.unmarshalInputupdateUserStatusInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
