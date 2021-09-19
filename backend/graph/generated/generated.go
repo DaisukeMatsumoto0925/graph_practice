@@ -57,19 +57,12 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-<<<<<<< HEAD
 		CreateTask       func(childComplexity int, input gmodel.NewTask) int
 		JoinUser         func(childComplexity int, input gmodel.JoinUserInput) int
 		PostMessage      func(childComplexity int, input gmodel.PostMessageInput) int
 		UpdateTask       func(childComplexity int, input gmodel.UpdateTask) int
 		UpdateUserStatus func(childComplexity int, input gmodel.UpdateUserStatusInput) int
-=======
-		CreateTask  func(childComplexity int, input gmodel.NewTask) int
-		JoinUser    func(childComplexity int, input gmodel.JoinUserInput) int
-		PostMessage func(childComplexity int, input gmodel.PostMessageInput) int
-		UpdateTask  func(childComplexity int, input gmodel.UpdateTask) int
-		UploadFile  func(childComplexity int, input gmodel.UploadFileInput) int
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
+		UploadFile       func(childComplexity int, input gmodel.UploadFileInput) int
 	}
 
 	PageInfo struct {
@@ -135,11 +128,8 @@ type MutationResolver interface {
 	UpdateTask(ctx context.Context, input gmodel.UpdateTask) (*gmodel.Task, error)
 	JoinUser(ctx context.Context, input gmodel.JoinUserInput) (*gmodel.User, error)
 	PostMessage(ctx context.Context, input gmodel.PostMessageInput) (*gmodel.Message, error)
-<<<<<<< HEAD
-	UpdateUserStatus(ctx context.Context, input gmodel.UpdateUserStatusInput) (*gmodel.UserStatus, error)
-=======
 	UploadFile(ctx context.Context, input gmodel.UploadFileInput) (*gmodel.UploadFilePayload, error)
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
+	UpdateUserStatus(ctx context.Context, input gmodel.UpdateUserStatusInput) (*gmodel.UserStatus, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, input gmodel.PaginationInput) (*gmodel.TaskConnection, error)
@@ -243,30 +233,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateTask(childComplexity, args["input"].(gmodel.UpdateTask)), true
 
-<<<<<<< HEAD
 	case "Mutation.updateUserStatus":
 		if e.complexity.Mutation.UpdateUserStatus == nil {
 			break
 		}
 
 		args, err := ec.field_Mutation_updateUserStatus_args(context.TODO(), rawArgs)
-=======
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUserStatus(childComplexity, args["input"].(gmodel.UpdateUserStatusInput)), true
+
 	case "Mutation.uploadFile":
 		if e.complexity.Mutation.UploadFile == nil {
 			break
 		}
 
 		args, err := ec.field_Mutation_uploadFile_args(context.TODO(), rawArgs)
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
 		if err != nil {
 			return 0, false
 		}
 
-<<<<<<< HEAD
-		return e.complexity.Mutation.UpdateUserStatus(childComplexity, args["input"].(gmodel.UpdateUserStatusInput)), true
-=======
 		return e.complexity.Mutation.UploadFile(childComplexity, args["input"].(gmodel.UploadFileInput)), true
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
 
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
@@ -646,13 +635,9 @@ type Mutation {
   updateTask(input: UpdateTask!): Task! @hasRole(role: ADMIN)
   joinUser(input: JoinUserInput!): User!
   postMessage(input: PostMessageInput!): Message!
-<<<<<<< HEAD
+  uploadFile(input: UploadFileInput!): UploadFilePayload!
   # key space
   updateUserStatus(input: updateUserStatusInput!): UserStatus!
-=======
-
-  uploadFile(input: UploadFileInput!): UploadFilePayload!
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
 }
 
 type Query {
@@ -663,7 +648,7 @@ type Query {
 type Subscription {
   messagePosted(userID: ID): Message!
   userJoined(userID: ID): User!
-    # key space
+  # key space
   userStatusChanged(userId: String!): UserStatus!
 }
 
@@ -729,19 +714,18 @@ type TaskEdge implements Edge {
 }
 `, BuiltIn: false},
 	{Name: "schema/userStatus.graphql", Input: `type UserStatus {
-  
   userId: ID!
-  status: State!
+  status: Status!
 }
 
-enum State {
+enum Status {
   ONLINE
   OFFLINE
 }
 
 input updateUserStatusInput {
   userID: ID!
-  message: String!
+  status: Status!
 }
 `, BuiltIn: false},
 }
@@ -826,7 +810,6 @@ func (ec *executionContext) field_Mutation_updateTask_args(ctx context.Context, 
 	return args, nil
 }
 
-<<<<<<< HEAD
 func (ec *executionContext) field_Mutation_updateUserStatus_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -834,7 +817,14 @@ func (ec *executionContext) field_Mutation_updateUserStatus_args(ctx context.Con
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNupdateUserStatusInput2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUpdateUserStatusInput(ctx, tmp)
-=======
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_uploadFile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -842,7 +832,6 @@ func (ec *executionContext) field_Mutation_uploadFile_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNUploadFileInput2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUploadFileInput(ctx, tmp)
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
 		if err != nil {
 			return nil, err
 		}
@@ -1300,11 +1289,7 @@ func (ec *executionContext) _Mutation_postMessage(ctx context.Context, field gra
 	return ec.marshalNMessage2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
-<<<<<<< HEAD
-func (ec *executionContext) _Mutation_updateUserStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-=======
 func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1321,11 +1306,7 @@ func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field grap
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-<<<<<<< HEAD
-	args, err := ec.field_Mutation_updateUserStatus_args(ctx, rawArgs)
-=======
 	args, err := ec.field_Mutation_uploadFile_args(ctx, rawArgs)
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1333,11 +1314,7 @@ func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-<<<<<<< HEAD
-		return ec.resolvers.Mutation().UpdateUserStatus(rctx, args["input"].(gmodel.UpdateUserStatusInput))
-=======
 		return ec.resolvers.Mutation().UploadFile(rctx, args["input"].(gmodel.UploadFileInput))
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1349,15 +1326,51 @@ func (ec *executionContext) _Mutation_uploadFile(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-<<<<<<< HEAD
-	res := resTmp.(*gmodel.UserStatus)
-	fc.Result = res
-	return ec.marshalNUserStatus2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUserStatus(ctx, field.Selections, res)
-=======
 	res := resTmp.(*gmodel.UploadFilePayload)
 	fc.Result = res
 	return ec.marshalNUploadFilePayload2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUploadFilePayload(ctx, field.Selections, res)
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
+}
+
+func (ec *executionContext) _Mutation_updateUserStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateUserStatus_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUserStatus(rctx, args["input"].(gmodel.UpdateUserStatusInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*gmodel.UserStatus)
+	fc.Result = res
+	return ec.marshalNUserStatus2ᚖgithubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐUserStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field graphql.CollectedField, obj *gmodel.PageInfo) (ret graphql.Marshaler) {
@@ -2535,9 +2548,9 @@ func (ec *executionContext) _UserStatus_status(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(gmodel.State)
+	res := resTmp.(gmodel.Status)
 	fc.Result = res
-	return ec.marshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx, field.Selections, res)
+	return ec.marshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3791,18 +3804,32 @@ func (ec *executionContext) unmarshalInputUpdateTask(ctx context.Context, obj in
 	return it, nil
 }
 
-<<<<<<< HEAD
-func (ec *executionContext) unmarshalInputupdateUserStatusInput(ctx context.Context, obj interface{}) (gmodel.UpdateUserStatusInput, error) {
-	var it gmodel.UpdateUserStatusInput
-=======
 func (ec *executionContext) unmarshalInputUploadFileInput(ctx context.Context, obj interface{}) (gmodel.UploadFileInput, error) {
 	var it gmodel.UploadFileInput
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-<<<<<<< HEAD
+		case "file":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+			it.File, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputupdateUserStatusInput(ctx context.Context, obj interface{}) (gmodel.UpdateUserStatusInput, error) {
+	var it gmodel.UpdateUserStatusInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
 		case "userID":
 			var err error
 
@@ -3811,18 +3838,11 @@ func (ec *executionContext) unmarshalInputUploadFileInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
-		case "message":
+		case "status":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
-			it.Message, err = ec.unmarshalNString2string(ctx, v)
-=======
-		case "file":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
-			it.File, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3974,13 +3994,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-<<<<<<< HEAD
-		case "updateUserStatus":
-			out.Values[i] = ec._Mutation_updateUserStatus(ctx, field)
-=======
 		case "uploadFile":
 			out.Values[i] = ec._Mutation_uploadFile(ctx, field)
->>>>>>> 323ca38e80d0f879a287f80b14b3fae1286d7d62
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateUserStatus":
+			out.Values[i] = ec._Mutation_updateUserStatus(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4721,13 +4741,13 @@ func (ec *executionContext) marshalNRole2githubᚗcomᚋDaisukeMatsumoto0925ᚋb
 	return v
 }
 
-func (ec *executionContext) unmarshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx context.Context, v interface{}) (gmodel.State, error) {
-	var res gmodel.State
+func (ec *executionContext) unmarshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, v interface{}) (gmodel.Status, error) {
+	var res gmodel.Status
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx context.Context, sel ast.SelectionSet, v gmodel.State) graphql.Marshaler {
+func (ec *executionContext) marshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v gmodel.Status) graphql.Marshaler {
 	return v
 }
 
