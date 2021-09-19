@@ -21,7 +21,8 @@ func main() {
 	redis := redis.New()
 
 	subscribers := resolver.Subscribers{
-		Message: subscriber.NewMessageSubscriber(context.Background(), redis),
+		Message:    subscriber.NewMessageSubscriber(context.Background(), redis),
+		UserStatus: subscriber.NewUserStatusSubscriber(context.Background(), redis),
 	}
 	loader := middleware.NewDataloader(db)
 
