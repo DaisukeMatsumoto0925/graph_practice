@@ -104,12 +104,12 @@ func (User) IsNode() {}
 
 type UserStatus struct {
 	UserID string `json:"userId"`
-	Status State  `json:"status"`
+	Status Status `json:"status"`
 }
 
 type UpdateUserStatusInput struct {
-	UserID  string `json:"userID"`
-	Message string `json:"message"`
+	UserID string `json:"userID"`
+	Status Status `json:"status"`
 }
 
 type Role string
@@ -153,43 +153,43 @@ func (e Role) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type State string
+type Status string
 
 const (
-	StateOnline  State = "ONLINE"
-	StateOffline State = "OFFLINE"
+	StatusOnline  Status = "ONLINE"
+	StatusOffline Status = "OFFLINE"
 )
 
-var AllState = []State{
-	StateOnline,
-	StateOffline,
+var AllStatus = []Status{
+	StatusOnline,
+	StatusOffline,
 }
 
-func (e State) IsValid() bool {
+func (e Status) IsValid() bool {
 	switch e {
-	case StateOnline, StateOffline:
+	case StatusOnline, StatusOffline:
 		return true
 	}
 	return false
 }
 
-func (e State) String() string {
+func (e Status) String() string {
 	return string(e)
 }
 
-func (e *State) UnmarshalGQL(v interface{}) error {
+func (e *Status) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = State(str)
+	*e = Status(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid State", str)
+		return fmt.Errorf("%s is not a valid Status", str)
 	}
 	return nil
 }
 
-func (e State) MarshalGQL(w io.Writer) {
+func (e Status) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
