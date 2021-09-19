@@ -1,0 +1,7 @@
+input UploadFileInput {
+  file: Upload!
+}
+
+type UploadFilePayload {
+  uploadedPath: String!
+}

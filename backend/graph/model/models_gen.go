@@ -7,6 +7,8 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Connection interface {
@@ -90,6 +92,14 @@ type UpdateTask struct {
 	Title     *string `json:"title"`
 	Note      *string `json:"note"`
 	Completed *int    `json:"completed"`
+}
+
+type UploadFileInput struct {
+	File graphql.Upload `json:"file"`
+}
+
+type UploadFilePayload struct {
+	UploadedPath string `json:"uploadedPath"`
 }
 
 type User struct {
