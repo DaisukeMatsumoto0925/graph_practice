@@ -614,7 +614,7 @@ type Query {
 type Subscription {
   messagePosted(userID: ID): Message!
   userJoined(userID: ID): User!
-    # key space
+  # key space
   userStatusChanged(userId: String!): UserStatus!
 }
 
@@ -679,19 +679,18 @@ type TaskEdge implements Edge {
 }
 `, BuiltIn: false},
 	{Name: "schema/userStatus.graphql", Input: `type UserStatus {
-  
   userId: ID!
-  status: State!
+  status: Status!
 }
 
-enum State {
+enum Status {
   ONLINE
   OFFLINE
 }
 
 input updateUserStatusInput {
   userID: ID!
-  message: String!
+  status: Status!
 }
 `, BuiltIn: false},
 }
@@ -2422,9 +2421,9 @@ func (ec *executionContext) _UserStatus_status(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(gmodel.State)
+	res := resTmp.(gmodel.Status)
 	fc.Result = res
-	return ec.marshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx, field.Selections, res)
+	return ec.marshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3692,11 +3691,11 @@ func (ec *executionContext) unmarshalInputupdateUserStatusInput(ctx context.Cont
 			if err != nil {
 				return it, err
 			}
-		case "message":
+		case "status":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
-			it.Message, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			it.Status, err = ec.unmarshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4563,13 +4562,13 @@ func (ec *executionContext) marshalNRole2githubᚗcomᚋDaisukeMatsumoto0925ᚋb
 	return v
 }
 
-func (ec *executionContext) unmarshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx context.Context, v interface{}) (gmodel.State, error) {
-	var res gmodel.State
+func (ec *executionContext) unmarshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, v interface{}) (gmodel.Status, error) {
+	var res gmodel.Status
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNState2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐState(ctx context.Context, sel ast.SelectionSet, v gmodel.State) graphql.Marshaler {
+func (ec *executionContext) marshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v gmodel.Status) graphql.Marshaler {
 	return v
 }
 
