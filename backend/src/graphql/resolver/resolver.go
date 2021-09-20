@@ -10,7 +10,8 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Subscribers struct {
-	Message *subscriber.MessageSubscriber
+	Message    *subscriber.MessageSubscriber
+	UserStatus *subscriber.UserStatusSubscriber
 }
 type Resolver struct {
 	db          *gorm.DB
