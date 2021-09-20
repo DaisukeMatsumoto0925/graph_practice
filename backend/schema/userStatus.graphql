@@ -10,5 +10,4 @@ enum Status {
 
 input updateUserStatusInput {
   userID: ID!
-  status: Status!
 }
