@@ -690,7 +690,6 @@ enum Status {
 
 input updateUserStatusInput {
   userID: ID!
-  status: Status!
 }
 `, BuiltIn: false},
 }
@@ -3688,14 +3687,6 @@ func (ec *executionContext) unmarshalInputupdateUserStatusInput(ctx context.Cont
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
 			it.UserID, err = ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "status":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			it.Status, err = ec.unmarshalNStatus2githubᚗcomᚋDaisukeMatsumoto0925ᚋbackendᚋgraphᚋmodelᚐStatus(ctx, v)
 			if err != nil {
 				return it, err
 			}

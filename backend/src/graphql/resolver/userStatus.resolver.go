@@ -12,7 +12,7 @@ func (r *mutationResolver) UpdateUserStatus(ctx context.Context, input gmodel.Up
 
 	if err := userStatusSubs.Client.Set(
 		ctx, input.UserID,
-		string(input.Status),
+		string(gmodel.StatusOnline),
 		time.Millisecond*time.Duration(6000),
 	).Err(); err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func (r *mutationResolver) UpdateUserStatus(ctx context.Context, input gmodel.Up
 
 	return &gmodel.UserStatus{
 		UserID: input.UserID,
-		Status: input.Status,
+		Status: gmodel.StatusOnline,
 	}, nil
 }
 

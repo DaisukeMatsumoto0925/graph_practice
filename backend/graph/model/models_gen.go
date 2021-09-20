@@ -109,7 +109,6 @@ type UserStatus struct {
 
 type UpdateUserStatusInput struct {
 	UserID string `json:"userID"`
-	Status Status `json:"status"`
 }
 
 type Role string

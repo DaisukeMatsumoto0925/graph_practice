@@ -52,8 +52,6 @@ func (m *UserStatusSubscriber) startSubscribingRedis(ctx context.Context) error 
 					switch status {
 					case "ONLINE":
 						userStatus.Status = gmodel.StatusOnline
-					case "OFFLINE":
-						userStatus.Status = gmodel.StatusOffline
 					}
 
 					m.Mutex.Lock()
