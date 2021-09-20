@@ -27,8 +27,6 @@ func (r *mutationResolver) UpdateUserStatus(ctx context.Context, input gmodel.Up
 func (r *subscriptionResolver) UserStatusChanged(ctx context.Context, userID string) (<-chan *gmodel.UserStatus, error) {
 	userStatusSubs := r.subscribers.UserStatus
 
-	// ch := make(chan *gmodel.UserStatus, 1)
-
 	userStatusSubs.Mutex.Lock()
 	channels, ok := userStatusSubs.UserStatusChannels[userID]
 	if !ok {

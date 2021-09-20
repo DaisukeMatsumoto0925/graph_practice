@@ -27,11 +27,9 @@ func NewUserStatusSubscriber(ctx context.Context, client *redis.Client) *UserSta
 }
 
 func (m *UserStatusSubscriber) startSubscribingRedis(ctx context.Context) error {
-	var err error
 	go func() {
 		pubsub := m.Client.PSubscribe(ctx, "__keyspace@0__:*")
 		defer pubsub.Close()
-
 		ch := pubsub.Channel()
 
 		for {
@@ -66,10 +64,6 @@ func (m *UserStatusSubscriber) startSubscribingRedis(ctx context.Context) error 
 				case "expired":
 					prefix := "__keyspace@0__:"
 					userID := strings.TrimPrefix(msg.Channel, prefix)
-					if err != nil {
-						fmt.Println(err)
-						continue
-					}
 					userStatus := &gmodel.UserStatus{
 						UserID: userID,
 						Status: gmodel.StatusOffline,
@@ -87,10 +81,6 @@ func (m *UserStatusSubscriber) startSubscribingRedis(ctx context.Context) error 
 			}
 		}
 	}()
-
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
