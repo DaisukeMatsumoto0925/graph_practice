@@ -4,9 +4,9 @@ WORKDIR /app
 
 RUN apk update --no-cache \
   && apk add --no-cache \
-    git \
-    gcc \
-    musl-dev
+  git \
+  gcc \
+  musl-dev
 
 COPY go.mod .
 COPY go.sum .
@@ -20,7 +20,7 @@ RUN GO111MODULE=off go get github.com/oxequa/realize
 RUN GO111MODULE=off go get -tags 'mysql' -u github.com/golang-migrate/migrate/cmd/migrate
 
 
-FROM alpine:3.10
+FROM alpine:3.14
 
 WORKDIR /app
 
