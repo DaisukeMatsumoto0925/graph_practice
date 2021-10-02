@@ -8,7 +8,7 @@ import (
 func NewRouter(graphqlHandler echo.HandlerFunc, middlewares []echo.MiddlewareFunc) *echo.Echo {
 	r := echo.New()
 	r.Use(middleware.Recover())
-	// r.Use(middleware.Logger())
+	r.Use(middleware.Logger())
 	r.Use(middlewares...)
 
 	r.GET("/", playgroundHandler())
