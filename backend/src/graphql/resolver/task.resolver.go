@@ -12,6 +12,8 @@ import (
 	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
 	"github.com/DaisukeMatsumoto0925/backend/src/dataloader"
 	"github.com/DaisukeMatsumoto0925/backend/src/domain"
+	"github.com/DaisukeMatsumoto0925/backend/src/graphql/graphErr"
+	"github.com/jinzhu/gorm"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -244,13 +246,23 @@ func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, erro
 	var task gmodel.Task
 
 	if err := r.db.First(&task, id).Error; err != nil {
-		graphql.AddError(ctx, &gqlerror.Error{
-			Path:    graphql.GetPath(ctx),
-			Message: fmt.Sprintf("Error %s", err),
-			Extensions: map[string]interface{}{
-				"code": "code1",
-			},
-		})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			graphql.AddError(ctx, &gqlerror.Error{
+				Path:    graphql.GetPath(ctx),
+				Message: fmt.Sprintf("Error %s", err),
+				Extensions: map[string]interface{}{
+					"code": graphErr.NOT_FOUND_ERR,
+				},
+			})
+		} else {
+			graphql.AddError(ctx, &gqlerror.Error{
+				Path:    graphql.GetPath(ctx),
+				Message: fmt.Sprintf("Error %s", err),
+				Extensions: map[string]interface{}{
+					"code": graphErr.DATABASE_ERR,
+				},
+			})
+		}
 		return nil, nil
 	}
 
