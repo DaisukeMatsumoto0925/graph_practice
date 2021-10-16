@@ -5,11 +5,6 @@ import (
 )
 
 func NewCors() echo.MiddlewareFunc {
-	// return middleware.CORSWithConfig(middleware.CORSConfig{
-	// 	AllowOrigins: []string{os.Getenv("CORS_ALLOW_ORIGIN")},
-	// 	AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	// })
-
 	return func(h echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			c.Response().Writer.Header().Set("Access-Control-Allow-Origin", c.Request().Header.Get("Origin"))
