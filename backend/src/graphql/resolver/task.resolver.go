@@ -7,10 +7,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
 	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
 	"github.com/DaisukeMatsumoto0925/backend/src/dataloader"
 	"github.com/DaisukeMatsumoto0925/backend/src/domain"
+	"github.com/DaisukeMatsumoto0925/backend/src/graphql/graphErr"
+	"github.com/jinzhu/gorm"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input gmodel.NewTask) (*gmodel.Task, error) {
@@ -240,15 +244,33 @@ func (r *queryResolver) Tasks(ctx context.Context, input gmodel.PaginationInput)
 
 func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, error) {
 	var task gmodel.Task
+
 	if err := r.db.First(&task, id).Error; err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			graphql.AddError(ctx, &gqlerror.Error{
+				Path:    graphql.GetPath(ctx),
+				Message: fmt.Sprintf("Error %s", err),
+				Extensions: map[string]interface{}{
+					"code": graphErr.NOT_FOUND_ERR,
+				},
+			})
+		} else {
+			graphql.AddError(ctx, &gqlerror.Error{
+				Path:    graphql.GetPath(ctx),
+				Message: fmt.Sprintf("Error %s", err),
+				Extensions: map[string]interface{}{
+					"code": graphErr.DATABASE_ERR,
+				},
+			})
+		}
+		return nil, nil
 	}
 
 	return &task, nil
 }
 
 func (r *taskResolver) ID(ctx context.Context, obj *gmodel.Task) (string, error) {
-	return fmt.Sprintf("%s:%s", "TASK", obj.ID), nil
+	return fmt.Sprintf("%s:%s", "TASK", obj.ID), errors.New("err")
 }
 
 func (r *taskResolver) User(ctx context.Context, obj *gmodel.Task) (*gmodel.User, error) {
