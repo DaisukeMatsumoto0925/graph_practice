@@ -7,7 +7,7 @@ import (
 )
 
 func NewCors() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(h echo.HandlerFunc) echo.HandlerFunc {
 
 		return func(c echo.Context) error {
 			c.Response().Writer.Header().Set("Access-Control-Allow-Origin", c.Request().Header.Get("Origin"))
@@ -17,15 +17,11 @@ func NewCors() echo.MiddlewareFunc {
 			c.Response().Header().Set("Access-Control-Expose-Headers", "Content-Length")
 			c.Response().Header().Set("Access-Control-Allow-Credentials", "true")
 
-			if err := next(c); err != nil {
-				c.Error(err)
-			}
-
 			if c.Request().Method == http.MethodOptions {
 				return c.NoContent(http.StatusNoContent)
 			}
 
-			return next(c)
+			return h(c)
 		}
 	}
 }
