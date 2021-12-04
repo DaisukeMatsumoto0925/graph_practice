@@ -29,7 +29,6 @@ func NewRouter(graphqlHandler echo.HandlerFunc, middlewares []echo.MiddlewareFun
 func csvRouter(g *echo.Group, ctrl *controller.Controller) {
 	constroller := controller.NewAnalyticsController(ctrl)
 	g.GET("/analytics", func(e echo.Context) error {
-		constroller.Sessions(e)
-		return nil
+		return constroller.TaskCSV(e)
 	})
 }
