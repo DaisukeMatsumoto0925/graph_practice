@@ -10,6 +10,7 @@ import (
 	"github.com/DaisukeMatsumoto0925/backend/src/infra/redis"
 	"github.com/DaisukeMatsumoto0925/backend/src/infra/server"
 	"github.com/DaisukeMatsumoto0925/backend/src/middleware"
+	"github.com/DaisukeMatsumoto0925/backend/src/rest/controller"
 	"github.com/labstack/echo"
 )
 
@@ -35,7 +36,8 @@ func main() {
 	resolver := resolver.New(db, subscribers)
 	directive := directive.New(db)
 	graphqlHandler := server.GraphqlHandler(resolver, directive)
-	router := server.NewRouter(graphqlHandler, middlewares)
+	controller := controller.NewController(db, redis)
+	router := server.NewRouter(graphqlHandler, middlewares, controller)
 	server.Run(router)
 
 }
