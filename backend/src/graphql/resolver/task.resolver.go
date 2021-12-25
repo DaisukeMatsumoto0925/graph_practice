@@ -270,7 +270,7 @@ func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, erro
 }
 
 func (r *taskResolver) ID(ctx context.Context, obj *gmodel.Task) (string, error) {
-	return fmt.Sprintf("%s:%s", "TASK", obj.ID), errors.New("err")
+	return fmt.Sprintf("%s:%s", "TASK", obj.ID), nil
 }
 
 func (r *taskResolver) User(ctx context.Context, obj *gmodel.Task) (*gmodel.User, error) {

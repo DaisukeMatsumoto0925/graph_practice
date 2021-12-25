@@ -9,7 +9,7 @@ import (
 func NewRouter(graphqlHandler echo.HandlerFunc, middlewares []echo.MiddlewareFunc, ctrl *controller.Controller) *echo.Echo {
 	r := echo.New()
 	r.Use(middleware.Recover())
-	r.Use(middleware.Logger())
+	// r.Use(middleware.Logger())
 	r.Use(middlewares...)
 
 	// GraphQLPlayGround
