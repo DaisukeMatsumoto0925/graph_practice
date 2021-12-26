@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/DaisukeMatsumoto0925/backend/graph/generated"
 	gmodel "github.com/DaisukeMatsumoto0925/backend/graph/model"
 	"github.com/DaisukeMatsumoto0925/backend/src/dataloader"
 	"github.com/DaisukeMatsumoto0925/backend/src/domain"
-	"github.com/DaisukeMatsumoto0925/backend/src/graphql/graphErr"
+	gql "github.com/DaisukeMatsumoto0925/backend/src/graphql"
+	"github.com/DaisukeMatsumoto0925/backend/src/util/apperror"
+	"github.com/DaisukeMatsumoto0925/backend/src/util/errorcode"
 	"github.com/jinzhu/gorm"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input gmodel.NewTask) (*gmodel.Task, error) {
@@ -247,21 +247,19 @@ func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, erro
 
 	if err := r.db.First(&task, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			graphql.AddError(ctx, &gqlerror.Error{
-				Path:    graphql.GetPath(ctx),
-				Message: fmt.Sprintf("Error %s", err),
-				Extensions: map[string]interface{}{
-					"code": graphErr.NOT_FOUND_ERR,
-				},
-			})
+
+			gql.HandleError(
+				ctx,
+				// apperror.Wrap(err).SetCode(errorcode.NotFound).Info("this is info"),
+				// apperror.Wrap(err, fmt.Sprintf("failed to get task id = %s", id)).SetCode(errorcode.NotFound),
+				apperror.New("new error").Info("this is Info1").SetCode(errorcode.NotFound),
+			)
 		} else {
-			graphql.AddError(ctx, &gqlerror.Error{
-				Path:    graphql.GetPath(ctx),
-				Message: fmt.Sprintf("Error %s", err),
-				Extensions: map[string]interface{}{
-					"code": graphErr.DATABASE_ERR,
-				},
-			})
+
+			gql.HandleError(
+				ctx,
+				apperror.Wrap(err, fmt.Sprintf("failed to get task id = %s", id)).SetCode(errorcode.Database),
+			)
 		}
 		return nil, nil
 	}
@@ -270,7 +268,7 @@ func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, erro
 }
 
 func (r *taskResolver) ID(ctx context.Context, obj *gmodel.Task) (string, error) {
-	return fmt.Sprintf("%s:%s", "TASK", obj.ID), errors.New("err")
+	return fmt.Sprintf("%s:%s", "TASK", obj.ID), nil
 }
 
 func (r *taskResolver) User(ctx context.Context, obj *gmodel.Task) (*gmodel.User, error) {
