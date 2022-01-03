@@ -248,6 +248,7 @@ func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, erro
 	if err := r.db.First(&task, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 
+			nestErr(ctx, apperror.New("new error").Info("this is Info1").SetCode(errorcode.Database))
 			gql.HandleError(
 				ctx,
 				// apperror.Wrap(err).SetCode(errorcode.NotFound).Info("this is info"),
@@ -265,6 +266,10 @@ func (r *queryResolver) Task(ctx context.Context, id string) (*gmodel.Task, erro
 	}
 
 	return &task, nil
+}
+
+func nestErr(ctx context.Context, err apperror.AppError) {
+	gql.HandleError(ctx, err)
 }
 
 func (r *taskResolver) ID(ctx context.Context, obj *gmodel.Task) (string, error) {

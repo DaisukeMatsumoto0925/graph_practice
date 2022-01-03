@@ -30,6 +30,8 @@ func main() {
 	middlewares := []echo.MiddlewareFunc{
 		middleware.Authorize(),
 		middleware.NewCors(),
+		middleware.NewInjectRequestID(),
+		middleware.NewInjectLogger(),
 		loader.InjectStoreStatusLoader(),
 	}
 
