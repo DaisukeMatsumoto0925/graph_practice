@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
+	"github.com/DaisukeMatsumoto0925/backend/src/util/appcontext"
 	"github.com/DaisukeMatsumoto0925/backend/src/util/apperror"
 	"github.com/DaisukeMatsumoto0925/backend/src/util/errorcode"
 	"github.com/DaisukeMatsumoto0925/backend/src/util/graphqlerr"
@@ -13,7 +13,7 @@ import (
 )
 
 func HandleError(ctx context.Context, err apperror.AppError) {
-	// logger := appcontext.GetLogger(ctx)
+	logger := appcontext.GetLogger(ctx)
 
 	var msg string
 
@@ -25,12 +25,13 @@ func HandleError(ctx context.Context, err apperror.AppError) {
 		if errors.As(err, &validationErr) {
 			graphqlerr.AddValidationErr(ctx, validationErr)
 		}
-		// logger.Info(msg)
-		log.Println(msg)
+		logger.Info(msg)
 	case errorcode.NotFound:
 		graphqlerr.AddErr(ctx, getInfoMessage(err), graphqlerr.NOT_FOUND_ERR)
-		log.Println(msg)
-		// logger.Warn(msg)
+		logger.Info(msg)
+	case errorcode.Database:
+		graphqlerr.AddErr(ctx, getInfoMessage(err), graphqlerr.NOT_FOUND_ERR)
+		logger.Warn(msg)
 	}
 }
 
